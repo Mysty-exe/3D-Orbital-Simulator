@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\ostou\Documents\Projects\Myst Animator\build\CMakeFiles\c1202e98eb40fbd4ccd022896fb74e82\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{09B330C3-32CA-3F97-805B-C0BA3932648D}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
