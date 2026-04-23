@@ -977,11 +977,11 @@ void SimulationUI::renderHelpMenu()
     titleText.setPos(15, titleText.getHeight());
     UIText helpControls = UIText("ESCAPE: Controls", font, 1).setPos(25, titleText.getEndY() + 15);
     UIText cameraControls = UIText("WASD, Space, Shift: Move Camera Around", font, 1).setPos(25, helpControls.getEndY() + 10);
-    UIText speedSimControls = UIText("CTRL + / -: Speed up/Slow down Simulation", font, 1).setPos(25, cameraControls.getEndY() + 10);
+    UIText speedSimControls = UIText("CTRL Plus / Minus: Speed up/Slow down Simulation", font, 1).setPos(25, cameraControls.getEndY() + 10);
     UIText pauseControls = UIText("CTRL P: Pause the Simulation", font, 1).setPos(25, speedSimControls.getEndY() + 10);
-    UIText followControls = UIText("CTRL < / >: Follow Object", font, 1).setPos(25, pauseControls.getEndY() + 10);
+    UIText followControls = UIText("CTRL + Left Arrow / Right Arrow: Follow Object", font, 1).setPos(25, pauseControls.getEndY() + 10);
     UIText stopFollowControls = UIText("CTRL Backspace: Stop Following Object", font, 1).setPos(25, followControls.getEndY() + 10);
-    UIText speedCamControls = UIText("< / >: Speed up / Slow down camera", font, 1).setPos(25, stopFollowControls.getEndY() + 10);
+    UIText speedCamControls = UIText("Left Arrow / Right Arrow: Speed up / Slow down camera", font, 1).setPos(25, stopFollowControls.getEndY() + 10);
     UIText dupControls = UIText("CTRL D: (While editing an object) Duplicate the object", font, 1).setPos(25, speedCamControls.getEndY() + 10);
     UIText delControls = UIText("DEL: (While editing an object) Delete the object", font, 1).setPos(25, dupControls.getEndY() + 10);
 
