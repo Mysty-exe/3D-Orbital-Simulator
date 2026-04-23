@@ -34,7 +34,7 @@ UIRenderer::UIRenderer(float WIDTH, float HEIGHT) : WIDTH(WIDTH), HEIGHT(HEIGHT)
     glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *)(3 * sizeof(float)));
     glEnableVertexAttribArray(1);
 
-    rectShader = Shader("shaders/UI/rect.vert", "shaders/UI/rect.frag", "");
+    rectShader = Shader("../shaders/UI/rect.vert", "../shaders/UI/rect.frag", "");
 
     rectShader.use();
     rectShader.setMat4("projection", glm::ortho(0.0f, WIDTH, HEIGHT, 0.0f));

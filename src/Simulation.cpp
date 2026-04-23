@@ -6,18 +6,18 @@ float Simulation::scaledRadiusFactor = 1.0 / 1000000.0;
 Simulation::Simulation(int WIDTH, int HEIGHT)
     : WIDTH(WIDTH), HEIGHT(HEIGHT), timeSpeed(1), accumulator(0.0f), timePassed(0), editing(false), paused(false), movingObject(false), avgDistance(0), focusedObjectInt(-1), moveType(0), focusedObject(nullptr), hoveringObject(nullptr), selectedObject(nullptr)
 {
-    lightShader = Shader("shaders/Star/star.vert", "shaders/Star/star.frag", "");
-    objShader = Shader("shaders/Object/obj.vert", "shaders/Object/obj.frag", "");
-    trajShader = Shader("shaders/Trajectory/traj.vert", "shaders/Trajectory/traj.frag", "");
-    highlightShader = Shader("shaders/Highlight/highlight.vert", "shaders/Highlight/highlight.frag", "");
+    lightShader = Shader("../shaders/Star/star.vert", "../shaders/Star/star.frag", "");
+    objShader = Shader("../shaders/Object/obj.vert", "../shaders/Object/obj.frag", "");
+    trajShader = Shader("../shaders/Trajectory/traj.vert", "../shaders/Trajectory/traj.frag", "");
+    highlightShader = Shader("../shaders/Highlight/highlight.vert", "../shaders/Highlight/highlight.frag", "");
 
     camera = new Camera(glm::vec3(0.0f, 0.0f, 2000.0f));
     camera->setSpeed(1000.0f);
 
-    celestialObjects.push_back(new CelestialObject("assets/Models/Stars/StarOne/obj.obj", "Sun", STAR, Vector(0.0f, 0.0f, 0.0f), 1.989 * pow(10, 30), 695700.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0), 7.25, 0));
-    celestialObjects.push_back(new CelestialObject("assets/Models/Planets/Earth/obj.obj", "Earth",
+    celestialObjects.push_back(new CelestialObject("../assets/Models/Stars/StarOne/obj.obj", "Sun", STAR, Vector(0.0f, 0.0f, 0.0f), 1.989 * pow(10, 30), 695700.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0), 7.25, 0));
+    celestialObjects.push_back(new CelestialObject("../assets/Models/Planets/Earth/obj.obj", "Earth",
                                                    PLANET, Vector(199600000.0f, 10000.0f, 0.0f), 5.97 * pow(10, 24), 60371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, -2, 29.722), 23.5, glm::two_pi<float>() / 86400.0));
-    // celestialObjects.push_back(new CelestialObject("assets/Models/Planets/Mars/obj.obj", "Mars",
+    // celestialObjects.push_back(new CelestialObject("../assets/Models/Planets/Mars/obj.obj", "Mars",
     //                                                PLANET, Vector(99600000.0f, -2134210.0f, 0.0f), 8.97 * pow(10, 24), 9371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, 3, -37.722), 23.5, glm::two_pi<float>() / 60000.0));
 
     dragPlaneY = 0;
@@ -40,7 +40,7 @@ void Simulation::resize(int WIDTH, int HEIGHT)
     this->HEIGHT = HEIGHT;
 
     textRenderer = TextRenderer(WIDTH, HEIGHT);
-    textRenderer.Load("assets/Fonts/Montserrat.ttf", 32);
+    textRenderer.Load("../assets/Fonts/Montserrat.ttf", 32);
 }
 
 void Simulation::setRenderMatrices(Shader &shader, glm::mat4 view, glm::mat4 projection)

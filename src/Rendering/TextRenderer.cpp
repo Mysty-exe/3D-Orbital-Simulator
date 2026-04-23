@@ -6,7 +6,7 @@ TextRenderer::TextRenderer()
 
 TextRenderer::TextRenderer(unsigned int width, unsigned int height)
 {
-    this->textShader = Shader("shaders/UI/text.vert", "shaders/UI/text.frag", "");
+    this->textShader = Shader("../shaders/UI/text.vert", "../shaders/UI/text.frag", "");
 
     textShader.use();
     textShader.setMat4("projection", glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f));

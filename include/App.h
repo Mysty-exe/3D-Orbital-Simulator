@@ -40,7 +40,7 @@ public:
         window = SDL_CreateWindow("Orbital Simulator", WIDTH, HEIGHT, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_MAXIMIZED);
 
         int w, h, c;
-        unsigned char *data = stbi_load("assets/Icons/simIcon.png", &w, &h, &c, 4);
+        unsigned char *data = stbi_load("../assets/Icons/simIcon.png", &w, &h, &c, 4);
         SDL_Surface *surface = SDL_CreateSurfaceFrom(
             w,
             h,
@@ -164,17 +164,17 @@ public:
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
 
         std::vector<std::string> faces{
-            "assets/Skybox/right.png",
-            "assets/Skybox/left.png",
-            "assets/Skybox/top.png",
-            "assets/Skybox/bottom.png",
-            "assets/Skybox/front.png",
-            "assets/Skybox/back.png"};
+            "../assets/Skybox/right.png",
+            "../assets/Skybox/left.png",
+            "../assets/Skybox/top.png",
+            "../assets/Skybox/bottom.png",
+            "../assets/Skybox/front.png",
+            "../assets/Skybox/back.png"};
         unsigned int cubemapTexture = loadCubemap(faces);
 
-        shaderBlur = Shader("shaders/Bloom/blur.vert", "shaders/Bloom/blur.frag", "");
-        shaderBloom = Shader("shaders/Bloom/screen.vert", "shaders/Bloom/screen.frag", "");
-        skyboxShader = Shader("shaders/SkyBox/skybox.vert", "shaders/SkyBox/skybox.frag", "");
+        shaderBlur = Shader("../shaders/Bloom/blur.vert", "../shaders/Bloom/blur.frag", "");
+        shaderBloom = Shader("../shaders/Bloom/screen.vert", "../shaders/Bloom/screen.frag", "");
+        skyboxShader = Shader("../shaders/SkyBox/skybox.vert", "../shaders/SkyBox/skybox.frag", "");
 
         shaderBlur.use();
         shaderBlur.setInt("image", 0);
