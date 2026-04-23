@@ -1,0 +1,13 @@
+# Cleaned MTL file
+
+newmtl jupiter
+Kd 1.000000 1.000000 1.000000        # diffuse color
+Ks 0.500000 0.500000 0.500000        # specular
+Ke 1.000000 1.000000 1.000000        # emissive (used same as diffuse)
+Ni 1.500000                           # index of refraction
+d 1.000000                            # opacity
+illum 2                               # lighting model
+
+map_Kd jupiter_diffuse.jpeg
+map_Ks jupiter_specularGlossiness.png
+map_Ke jupiter_diffuse.jpeg

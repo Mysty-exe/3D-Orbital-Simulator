@@ -68,7 +68,6 @@ class IOStream;
 class IOSystem;
 class ProgressHandler;
 
-
 // =======================================================================
 // Plugin development
 //
@@ -97,32 +96,32 @@ namespace Assimp {
 
 // ----------------------------------------------------------------------------------
 /** CPP-API: The Importer class forms an C++ interface to the functionality of the
-*   Open Asset Import Library.
-*
-* Create an object of this class and call ReadFile() to import a file.
-* If the import succeeds, the function returns a pointer to the imported data.
-* The data remains property of the object, it is intended to be accessed
-* read-only. The imported data will be destroyed along with the Importer
-* object. If the import fails, ReadFile() returns a nullptr pointer. In this
-* case you can retrieve a human-readable error description be calling
-* GetErrorString(). You can call ReadFile() multiple times with a single Importer
-* instance. Actually, constructing Importer objects involves quite many
-* allocations and may take some time, so it's better to reuse them as often as
-* possible.
-*
-* If you want to let assimp deal with OutOfMemory-exception make sure that
-* ASSIMP_CATCH_GLOBAL_EXCEPTIONS is set.
-* If this is not the case you need to catch the exception by yourself.
-*
-* If you need the Importer to do custom file handling to access the files,
-* implement IOSystem and IOStream and supply an instance of your custom
-* IOSystem implementation by calling SetIOHandler() before calling ReadFile().
-* If you do not assign a custom IO handler, a default handler using the
-* standard C++ IO logic will be used.
-*
-* @note One Importer instance is not thread-safe. If you use multiple
-* threads for loading, each thread should maintain its own Importer instance.
-*/
+ *   Open Asset Import Library.
+ *
+ * Create an object of this class and call ReadFile() to import a file.
+ * If the import succeeds, the function returns a pointer to the imported data.
+ * The data remains property of the object, it is intended to be accessed
+ * read-only. The imported data will be destroyed along with the Importer
+ * object. If the import fails, ReadFile() returns a nullptr pointer. In this
+ * case you can retrieve a human-readable error description be calling
+ * GetErrorString(). You can call ReadFile() multiple times with a single Importer
+ * instance. Actually, constructing Importer objects involves quite many
+ * allocations and may take some time, so it's better to reuse them as often as
+ * possible.
+ *
+ * If you want to let assimp deal with OutOfMemory-exception make sure that
+ * ASSIMP_CATCH_GLOBAL_EXCEPTIONS is set.
+ * If this is not the case you need to catch the exception by yourself.
+ *
+ * If you need the Importer to do custom file handling to access the files,
+ * implement IOSystem and IOStream and supply an instance of your custom
+ * IOSystem implementation by calling SetIOHandler() before calling ReadFile().
+ * If you do not assign a custom IO handler, a default handler using the
+ * standard C++ IO logic will be used.
+ *
+ * @note One Importer instance is not thread-safe. If you use multiple
+ * threads for loading, each thread should maintain its own Importer instance.
+ */
 class ASSIMP_API Importer {
 public:
     /**
@@ -269,7 +268,7 @@ public:
      *   GetPropertyFloat() to read the property, but it won't be there.
      */
     int GetPropertyInteger(const char *szName,
-            int iErrorReturn = 0xffffffff) const;
+                           int iErrorReturn = 0xffffffff) const;
 
     // -------------------------------------------------------------------
     /** Get a boolean configuration property. Boolean properties
@@ -287,7 +286,7 @@ public:
      * @see GetPropertyInteger()
      */
     ai_real GetPropertyFloat(const char *szName,
-            ai_real fErrorReturn = 10e10) const;
+                             ai_real fErrorReturn = 10e10) const;
 
     // -------------------------------------------------------------------
     /** Get a string configuration property
@@ -296,7 +295,7 @@ public:
      * @see GetPropertyInteger()
      */
     std::string GetPropertyString(const char *szName,
-            const std::string &sErrorReturn = std::string()) const;
+                                  const std::string &sErrorReturn = std::string()) const;
 
     // -------------------------------------------------------------------
     /** Get a matrix configuration property
@@ -305,7 +304,7 @@ public:
      * @see GetPropertyInteger()
      */
     aiMatrix4x4 GetPropertyMatrix(const char *szName,
-            const aiMatrix4x4 &sErrorReturn = aiMatrix4x4()) const;
+                                  const aiMatrix4x4 &sErrorReturn = aiMatrix4x4()) const;
 
     // -------------------------------------------------------------------
     /** Get a pointer configuration property
@@ -313,8 +312,8 @@ public:
      *  The return value remains valid until the property is modified.
      * @see GetPropertyInteger()
      */
-    void* GetPropertyPointer(const char *szName,
-        void *sErrorReturn = nullptr) const;
+    void *GetPropertyPointer(const char *szName,
+                             void *sErrorReturn = nullptr) const;
 
     // -------------------------------------------------------------------
     /** Supplies a custom IO handler to the importer to use to open and
@@ -523,7 +522,7 @@ public:
      *
      * @note The returned value remains valid until one of the
      * following methods is called: #ReadFile(), #FreeScene(). */
-    const std::exception_ptr& GetException() const;
+    const std::exception_ptr &GetException() const;
 
     // -------------------------------------------------------------------
     /** Returns the scene loaded by the last successful call to ReadFile()
@@ -595,42 +594,42 @@ public:
 
     // -------------------------------------------------------------------
     /** Get meta data for the importer corresponding to a specific index..
-    *
-    *  For the declaration of #aiImporterDesc, include <assimp/importerdesc.h>.
-    *  @param index Index to query, must be within [0,GetImporterCount())
-    *  @return Importer meta data structure, nullptr if the index does not
-    *     exist or if the importer doesn't offer meta information (
-    *     importers may do this at the cost of being hated by their peers).*/
+     *
+     *  For the declaration of #aiImporterDesc, include <assimp/importerdesc.h>.
+     *  @param index Index to query, must be within [0,GetImporterCount())
+     *  @return Importer meta data structure, nullptr if the index does not
+     *     exist or if the importer doesn't offer meta information (
+     *     importers may do this at the cost of being hated by their peers).*/
     const aiImporterDesc *GetImporterInfo(size_t index) const;
 
     // -------------------------------------------------------------------
     /** Find the importer corresponding to a specific index.
-    *
-    *  @param index Index to query, must be within [0,GetImporterCount())
-    *  @return Importer instance. nullptr if the index does not
-    *     exist. */
+     *
+     *  @param index Index to query, must be within [0,GetImporterCount())
+     *  @return Importer instance. nullptr if the index does not
+     *     exist. */
     BaseImporter *GetImporter(size_t index) const;
 
     // -------------------------------------------------------------------
     /** Find the importer corresponding to a specific file extension.
-    *
-    *  This is quite similar to #IsExtensionSupported except a
-    *  BaseImporter instance is returned.
-    *  @param szExtension Extension to check for. The following formats
-    *    are recognized (BAH being the file extension): "BAH" (comparison
-    *    is case-insensitive), ".bah", "*.bah" (wild card and dot
-    *    characters at the beginning of the extension are skipped).
-    *  @return nullptr if no importer is found*/
+     *
+     *  This is quite similar to #IsExtensionSupported except a
+     *  BaseImporter instance is returned.
+     *  @param szExtension Extension to check for. The following formats
+     *    are recognized (BAH being the file extension): "BAH" (comparison
+     *    is case-insensitive), ".bah", "*.bah" (wild card and dot
+     *    characters at the beginning of the extension are skipped).
+     *  @return nullptr if no importer is found*/
     BaseImporter *GetImporter(const char *szExtension) const;
 
     // -------------------------------------------------------------------
     /** Find the importer index corresponding to a specific file extension.
-    *
-    *  @param szExtension Extension to check for. The following formats
-    *    are recognized (BAH being the file extension): "BAH" (comparison
-    *    is case-insensitive), ".bah", "*.bah" (wild card and dot
-    *    characters at the beginning of the extension are skipped).
-    *  @return (size_t)-1 if no importer is found */
+     *
+     *  @param szExtension Extension to check for. The following formats
+     *    are recognized (BAH being the file extension): "BAH" (comparison
+     *    is case-insensitive), ".bah", "*.bah" (wild card and dot
+     *    characters at the beginning of the extension are skipped).
+     *  @return (size_t)-1 if no importer is found */
     size_t GetImporterIndex(const char *szExtension) const;
 
     // -------------------------------------------------------------------

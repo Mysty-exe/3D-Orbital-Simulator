@@ -1,0 +1,19 @@
+# Cleaned MTL file
+
+newmtl Material.002
+Kd 1.000000 1.000000 1.000000       # diffuse color
+Ks 0.500000 0.500000 0.500000       # specular
+Ke 0.000000 0.000000 0.000000       # emissive
+Ni 1.500000                          # index of refraction
+d 1.000000                           # opacity
+illum 2                              # lighting model
+map_Kd Material.002_diffuse.jpeg
+
+newmtl ring
+Kd 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.500000
+d 1.000000
+illum 2
+map_Kd ring_diffuse.jpeg

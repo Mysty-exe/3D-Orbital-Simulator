@@ -2,13 +2,10 @@
 <Project>
   <ProjectOutputs>
     <ProjectOutput>
-      <FullPath>C:\Users\ostou\Documents\Projects\Myst Animator\build\x64\Release\ZERO_CHECK</FullPath>
+      <FullPath>C:\Users\ostou\Documents\Projects\Orbital Simulator\build\x64\Release\ZERO_CHECK</FullPath>
     </ProjectOutput>
     <ProjectOutput>
-      <FullPath>C:\Users\ostou\Documents\Projects\Myst Animator\build\libs\assimp\bin\Release\assimp-vc143-mt.dll</FullPath>
-    </ProjectOutput>
-    <ProjectOutput>
-      <FullPath>C:\Users\ostou\Documents\Projects\Myst Animator\build\Release\app.exe</FullPath>
+      <FullPath>C:\Users\ostou\Documents\Projects\Orbital Simulator\build\Release\app.exe</FullPath>
     </ProjectOutput>
   </ProjectOutputs>
   <ContentFiles />

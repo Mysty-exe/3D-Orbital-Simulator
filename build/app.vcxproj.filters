@@ -1,16 +1,61 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\ostou\Documents\Projects\Myst Animator\main.cpp">
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Meshes\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Meshes\ObjectMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Meshes\SphereMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Meshes\TrajectoryMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Objects\CelestialObject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Rendering\Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Rendering\Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Rendering\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Rendering\TextRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Rendering\stb_image.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Simulation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\UI\SimulationUI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\UI\UINodes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\UI\UIRenderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\Utils\Timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\ostou\Documents\Projects\Myst Animator\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\ostou\Documents\Projects\Orbital Simulator\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{B6DCA7F1-9910-3596-88A7-177E7448FCEC}</UniqueIdentifier>
+      <UniqueIdentifier>{D852590F-53A0-3A5C-BB38-461D03EADA23}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>
