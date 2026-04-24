@@ -32,18 +32,18 @@ void UIRect::addBodyIcon(std::unique_ptr<UIIcon> i)
     height += h + 10;
     contentHeight += h + 10;
 }
-void UIRect::setTitle(UIText &text)
+void UIRect::setTitle(UIText &text, glm::vec2 scale)
 {
     title.clear();
     if (wrapWidth)
     {
-        contentWidth = (contentWidth < text.getWidth()) ? text.getWidth() : contentWidth;
+        contentWidth = (contentWidth < text.getWidth() * scale.x) ? text.getWidth() * scale.x : contentWidth;
         width = contentWidth + 30;
     }
     else
     {
         int x = (icon != nullptr) ? icon->getWidth() + 25 : 0;
-        if (text.getWidth() + x > width * 0.9)
+        if (text.getWidth() * scale.x + x > width * 0.9)
         {
             UIText temp = text;
             std::string currentLine;
@@ -56,7 +56,7 @@ void UIRect::setTitle(UIText &text)
                 if (temp.getWidth() + x > width * 0.9)
                 {
                     temp.setText(currentLine);
-                    contentHeight += temp.getHeight() + 10;
+                    contentHeight += temp.getHeight() * scale.y + 10;
                     title.push_back(temp);
 
                     currentLine = std::string(1, c);
@@ -68,7 +68,7 @@ void UIRect::setTitle(UIText &text)
             if (!currentLine.empty())
             {
                 temp.setText(currentLine);
-                contentHeight += temp.getHeight() + 10;
+                contentHeight += temp.getHeight() * scale.y + 10;
                 title.push_back(temp);
             }
 
@@ -79,7 +79,7 @@ void UIRect::setTitle(UIText &text)
         }
     }
 
-    contentHeight += text.getHeight() + 15;
+    contentHeight += text.getHeight() * scale.y + 15;
     if (wrapHeight)
     {
         height = contentHeight;
@@ -87,16 +87,16 @@ void UIRect::setTitle(UIText &text)
 
     title.push_back(text);
 }
-void UIRect::addText(UIText &text)
+void UIRect::addText(UIText &text, glm::vec2 scale)
 {
     if (wrapWidth)
     {
-        contentWidth = (contentWidth < text.getWidth()) ? text.getWidth() : contentWidth;
+        contentWidth = (contentWidth < text.getWidth() * scale.x) ? text.getWidth() * scale.x : contentWidth;
         width = contentWidth + 30;
     }
     else
     {
-        if (text.getWidth() > width * 0.9)
+        if (text.getWidth() * scale.x > width * 0.9)
         {
             UIText temp = text;
             std::string currentLine;
@@ -109,7 +109,7 @@ void UIRect::addText(UIText &text)
                 if (temp.getWidth() > width * 0.9)
                 {
                     temp.setText(currentLine);
-                    contentHeight += temp.getHeight() + 10;
+                    contentHeight += temp.getHeight() * scale.y + 10;
                     texts.push_back(temp);
 
                     currentLine = std::string(1, c);
@@ -121,7 +121,7 @@ void UIRect::addText(UIText &text)
             if (!currentLine.empty())
             {
                 temp.setText(currentLine);
-                contentHeight += temp.getHeight() + 10;
+                contentHeight += temp.getHeight() * scale.y + 10;
                 texts.push_back(temp);
             }
 
@@ -132,7 +132,7 @@ void UIRect::addText(UIText &text)
         }
     }
 
-    contentHeight += text.getHeight() + 20;
+    contentHeight += text.getHeight() * scale.y + 20;
     if (wrapHeight)
     {
         height = contentHeight + 20;
@@ -140,12 +140,12 @@ void UIRect::addText(UIText &text)
 
     texts.push_back(text);
 }
-void UIRect::addTextField(std::unique_ptr<UITextField> textField)
+void UIRect::addTextField(std::unique_ptr<UITextField> textField, glm::vec2 scale)
 {
     textField->setFieldWidth(width - 20);
-    textField->setPositions();
+    textField->setPositions(scale);
     textField->setScroll(scroll);
-    contentHeight += textField->getTitle().getHeight() + 10 + textField->getHeight() + 10;
+    contentHeight += textField->getTitle().getHeight() * scale.y + 10 + textField->getHeight() + 10;
     height = contentHeight + 20;
 
     textFields.push_back(std::move(textField));
@@ -232,25 +232,25 @@ UITextField::UITextField(TextFieldHelper helper, glm::vec2 size, glm::vec2 pos, 
     rect.setWrap(false, true);
     rect.setCornerRadius(0.0);
 }
-void UITextField::setPositions()
+void UITextField::setPositions(glm::vec2 scale)
 {
     UIText temp = text;
 
     texts.clear();
-    rect.setHeight(text.getHeight() + 30);
+    rect.setHeight(text.getHeight() * scale.y + 30);
 
     if (temp.getText().empty() || temp.setText("PLACEHOLDER").getHeight() < text.getHeight())
-        rect.setHeight(temp.setText("PLACEHOLDER").getHeight() + 30);
+        rect.setHeight(temp.setText("PLACEHOLDER").getHeight() * scale.y + 30);
 
     if (!units.getText().empty())
-        setFieldWidth(rect.getWidth() - units.getWidth() - 20);
+        setFieldWidth(rect.getWidth() - units.getWidth() * scale.y - 20);
 
     float maxWidth = rect.getWidth() * 0.95;
     std::string original = text.getText();
 
     if (text.getWidth() > maxWidth)
     {
-        height = title.getHeight() + 10;
+        height = title.getHeight() * scale.y + 10;
 
         std::string currentLine;
 
@@ -264,7 +264,7 @@ void UITextField::setPositions()
                 temp.setText(currentLine);
                 texts.push_back(temp);
 
-                rect.setHeight(rect.getHeight() + temp.getHeight() + 10);
+                rect.setHeight(rect.getHeight() + temp.getHeight() * scale.y + 10);
 
                 currentLine = std::string(1, c);
             }
@@ -279,14 +279,14 @@ void UITextField::setPositions()
             temp.setText(currentLine);
             texts.push_back(temp);
 
-            rect.setHeight(rect.getHeight() + temp.getHeight() + 5);
+            rect.setHeight(rect.getHeight() + temp.getHeight() * scale.y + 5);
         }
 
-        height = title.getHeight() + 20 + rect.getHeight() + 20 + error.getHeight();
+        height = title.getHeight() * scale.y + 20 + rect.getHeight() + 20 + error.getHeight() * scale.y;
         return;
     }
 
-    height = title.getHeight() + 20 + rect.getHeight() + 20 + error.getHeight();
+    height = title.getHeight() * scale.y + 20 + rect.getHeight() + 20 + error.getHeight() * scale.y;
     texts.push_back(text);
 }
 

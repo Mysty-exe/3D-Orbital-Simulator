@@ -15,10 +15,10 @@ Simulation::Simulation(int WIDTH, int HEIGHT)
     camera->setSpeed(1000.0f);
 
     // celestialObjects.push_back(new CelestialObject("../assets/Models/Stars/StarOne/obj.obj", "Sun", STAR, Vector(0.0f, 0.0f, 0.0f), 1.989 * pow(10, 30), 695700.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0), 7.25, 0));
-    // celestialObjects.push_back(new CelestialObject("../assets/Models/Planets/Uranus/obj.obj", "Uranus",
-    //                                                PLANET, Vector(200000000.0f, 0.0f, 0.0f), 5.97 * pow(10, 24), 60371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, -2, 29.722), 23.5, glm::two_pi<float>() / 86400.0));
+    // celestialObjects.push_back(new CelestialObject("../assets/Models/Planets/Earth/obj.obj", "Earth",
+    //                                                PLANET, Vector(150000000.0f, 0.0f, 0.0f), 5.97 * pow(10, 24), 6371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, -2, 29.722), 23.5, glm::two_pi<float>() / 86400.0));
     // celestialObjects.push_back(new CelestialObject("../assets/Models/Planets/Mars/obj.obj", "Mars",
-    //                                                PLANET, Vector(99600000.0f, -2134210.0f, 0.0f), 8.97 * pow(10, 24), 9371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, 3, -37.722), 23.5, glm::two_pi<float>() / 60000.0));
+    //                                                PLANET, Vector(225000000.0f, -2134210.0f, 0.0f), 8.97 * pow(10, 24), 9371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, 3, -37.722), 23.5, glm::two_pi<float>() / 60000.0));
 
     dragPlaneY = 0;
 }
@@ -138,9 +138,14 @@ void Simulation::drawHighlightedObj(CelestialObject *obj)
     glStencilMask(0x00);
     trajShader.use();
     trajShader.setVec3("color", glm::vec3(1.0f));
-    obj->drawTrajectory(trajShader);
+
+    if (!editing)
+    {
+        obj->drawTrajectory(trajShader);
+        trajShader.setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
+        obj->drawNetForceVector(trajShader);
+    }
     trajShader.setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
-    obj->drawNetForceVector(trajShader);
     obj->drawDirectionVector(trajShader);
 
     glEnable(GL_DEPTH_TEST);
@@ -231,7 +236,7 @@ void Simulation::run(SDL_Window *window, EventManager *eventManager, SimulationU
         selectedObject = nullptr;
     }
     else
-        focusedObject = nullptr;
+        setFocusedObject(nullptr);
 
     for (CelestialObject *obj : getObjectsByDistance((isFollowCam()) ? getFocusedObject() : nullptr))
     {
@@ -352,16 +357,18 @@ CelestialObject *Simulation::getCentralBody(CelestialObject *obj)
     Vector force;
     for (CelestialObject *body : celestialObjects)
     {
-        if (obj != body)
+        if (body == obj)
+            continue;
+        if (body->getMass() <= obj->getMass())
+            continue;
+
+        largeFloat distance = (body->getPosition() - obj->getPosition()).magnitude;
+        Vector direction = (body->getPosition() - obj->getPosition()).normalized();
+        Vector f = direction * ((CelestialObject::gConstant * obj->getMass() * body->getMass()) / (distance * distance));
+        if (f.magnitude > force.magnitude)
         {
-            largeFloat distance = (body->getPosition() - obj->getPosition()).magnitude * 1000;
-            Vector direction = (body->getPosition() - obj->getPosition()).normalized();
-            Vector f = direction * ((CelestialObject::gConstant * obj->getMass() * body->getMass()) / (distance * distance));
-            if (f.magnitude > force.magnitude)
-            {
-                result = body;
-                force = f;
-            }
+            result = body;
+            force = f;
         }
     }
 
@@ -383,8 +390,9 @@ void Simulation::handleEvents(SDL_Window *window, EventManager *eventManager, Si
     {
         camera->setRotating(false);
         SDL_SetWindowRelativeMouseMode(window, false);
+        if (movingObject)
+            simUI->resetScroll();
         movingObject = false;
-        simUI->resetScroll();
     }
 
     if (hoveringObject != nullptr)
@@ -508,7 +516,7 @@ void Simulation::handleEvents(SDL_Window *window, EventManager *eventManager, Si
         }
     }
 
-    if (eventManager->checkHoldKeyEvent(CTRL) && !editing)
+    if (eventManager->checkHoldKeyEvent(CTRL) && simUI->currentState() == SIM)
     {
         if (eventManager->checkPressKeyEvent(P))
             pause(!paused);
@@ -525,16 +533,18 @@ void Simulation::handleEvents(SDL_Window *window, EventManager *eventManager, Si
         if (celestialObjects.size() > 0)
         {
             if (eventManager->checkPressKeyEvent(BACKSPACE))
-                focusedObject = nullptr;
+                setFocusedObject(nullptr);
             if (eventManager->checkPressKeyEvent(LEFT))
             {
-                focusedObjectInt = (focusedObjectInt <= 0 && celestialObjects.size() > 0) ? celestialObjects.size() - 1 : focusedObjectInt - 1;
+                simUI->resetScroll();
+                focusedObjectInt = (focusedObjectInt <= 0) ? celestialObjects.size() - 1 : focusedObjectInt - 1;
                 camera->setCameraDirection(glm::normalize(celestialObjects[focusedObjectInt]->getRenderPos(alpha).getGLM() - camera->getCameraPos()));
                 focusedObject = celestialObjects[focusedObjectInt];
             }
             else if (eventManager->checkPressKeyEvent(RIGHT))
             {
-                focusedObjectInt = (focusedObjectInt >= celestialObjects.size() - 1 && celestialObjects.size() > 0) ? 0 : focusedObjectInt + 1;
+                simUI->resetScroll();
+                focusedObjectInt = (focusedObjectInt >= celestialObjects.size() - 1) ? 0 : focusedObjectInt + 1;
                 camera->setCameraDirection(glm::normalize(celestialObjects[focusedObjectInt]->getRenderPos(alpha).getGLM() - camera->getCameraPos()));
                 focusedObject = celestialObjects[focusedObjectInt];
             }
@@ -730,10 +740,13 @@ CelestialObject *Simulation::getFocusedObject()
 
 void Simulation::setFocusedObject(CelestialObject *obj)
 {
-    if (obj == nullptr)
-        focusedObjectInt = -1;
-
     focusedObject = obj;
+    if (obj == nullptr)
+    {
+        focusedObjectInt = -1;
+        return;
+    }
+
     for (int i = 0; i < celestialObjects.size(); i++)
     {
         if (celestialObjects[i] == obj)

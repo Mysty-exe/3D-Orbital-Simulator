@@ -320,7 +320,7 @@ void CelestialObject::setAcceleration(Vector acc)
 
 void CelestialObject::setOrbitalValues(CelestialObject *centralBody)
 {
-    if (centralBody == nullptr)
+    if (!centralBody)
     {
         orbitalPeriod = NAN;
         i = NAN;
@@ -330,25 +330,29 @@ void CelestialObject::setOrbitalValues(CelestialObject *centralBody)
         return;
     }
 
-    Vector r = (position - centralBody->getPosition());
-    Vector v = (velocity - centralBody->getVelocity());
+    Vector r = position - centralBody->getPosition();
+    Vector v = velocity - centralBody->getVelocity();
 
-    largeFloat mu = gConstant * (centralBody->getMass());
+    largeFloat mu = gConstant * (centralBody->getMass() + mass);
 
-    // Angular momentum
     h = r.cross(v);
 
-    // Eccentricity
     Vector eVec = (v.cross(h) / mu) - r.normalized();
     e = eVec.magnitude;
 
-    largeFloat energy =
-        (v.dot(v) * 0.5) - (mu / r.magnitude);
+    largeFloat energy = 0.5 * v.dot(v) - (mu / r.magnitude);
 
-    // Semi-major axis
-    a = -mu / (2.0 * energy);
+    if (energy >= 0)
+    {
+        a = NAN;
+        orbitalPeriod = NAN;
+    }
+    else
+    {
+        a = -mu / (2.0 * energy);
+        orbitalPeriod = 2 * glm::pi<float>() * sqrt((a * a * a) / mu);
+    }
 
-    // Inclination
     largeFloat cos_i = h.y / h.magnitude;
     if (cos_i > 1.0)
         cos_i = 1.0;
@@ -356,23 +360,19 @@ void CelestialObject::setOrbitalValues(CelestialObject *centralBody)
         cos_i = -1.0;
     i = glm::degrees(acos(static_cast<float>(cos_i)));
 
-    if (!isOrbiting())
+    if (std::isnan(a))
     {
-        i = NAN;
-        a = NAN;
         rp = NAN;
         ra = NAN;
-        orbitalPeriod = NAN;
     }
     else
     {
         rp = a * (1 - e);
         ra = a * (1 + e);
-        orbitalPeriod = 2 * glm::pi<float>() * sqrt(pow(a, 3) / mu);
     }
 
-    escapeVel = sqrt((2 * gConstant * centralBody->getMass()) / r.magnitude);
-    circularVel = sqrt((gConstant * centralBody->getMass()) / r.magnitude);
+    escapeVel = sqrt((2 * mu) / r.magnitude);
+    circularVel = sqrt(mu / r.magnitude);
 }
 
 void CelestialObject::setEnergyValues(std::vector<CelestialObject *> objects)
@@ -406,9 +406,9 @@ std::string CelestialObject::getObjTypeStr() const
 {
     if (objType == STAR)
         return "Star";
-    if (objType == PLANET)
+    else if (objType == PLANET)
         return "Planet";
-    if (objType == MOON)
+    else if (objType == MOON)
         return "Moon";
 
     return "";

@@ -194,11 +194,16 @@ void UIRenderer::drawPanel(UIPanel &panel, glm::vec2 scale)
         glEnable(GL_SCISSOR_TEST);
     }
 
+    if (panel.isLines() && title.size() > 0)
+        drawLine(panel.getWidth() - 50, glm::vec2(panel.getX() + 25, title[title.size() - 1].getEndY() + 20));
+
+    int inc = 0;
     for (auto &rect : panel.getRects())
     {
+        inc++;
         drawRect(*(rect.get()));
 
-        if (panel.isLines())
+        if (panel.isLines() && inc != 1)
             drawLine(panel.getWidth() - 50, glm::vec2(panel.getX() + 25, rect->getY() - 10 - rect->getScroll()));
 
         if (rect->getIcon() != nullptr)

@@ -1,10 +1,11 @@
 
 #pragma once
 #include <iostream>
-#include <map>
+#include <unordered_map>
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <vector>
 
 #include <freetype/include/ft2build.h>
 #include FT_FREETYPE_H
@@ -22,7 +23,7 @@ struct Character
 class TextRenderer
 {
 public:
-    std::map<char, Character> Characters;
+    std::unordered_map<uint32_t, Character> Characters;
     Shader textShader;
 
     TextRenderer();

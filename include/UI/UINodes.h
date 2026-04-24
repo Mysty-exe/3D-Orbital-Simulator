@@ -113,9 +113,9 @@ public:
     void addIcon(std::string path, glm::vec2 size);
     void addBodyIcon(std::unique_ptr<UIIcon> i);
     UIIcon *getIcon() const { return icon.get(); }
-    void setTitle(UIText &text);
-    void addText(UIText &text);
-    void addTextField(std::unique_ptr<UITextField> textField);
+    void setTitle(UIText &text, glm::vec2 scale);
+    void addText(UIText &text, glm::vec2 scale);
+    void addTextField(std::unique_ptr<UITextField> textField, glm::vec2 scale);
     void setPositions(glm::vec2 scale);
     std::vector<UIText> &getTitle() { return title; }
     std::vector<UIText> &getTexts() { return texts; }
@@ -154,7 +154,7 @@ private:
 public:
     UITextField();
     UITextField(TextFieldHelper helper, glm::vec2 size, glm::vec2 pos, UIText units, glm::vec4 color);
-    void setPositions();
+    void setPositions(glm::vec2 scale);
     void setX(float x)
     {
         this->x = x;

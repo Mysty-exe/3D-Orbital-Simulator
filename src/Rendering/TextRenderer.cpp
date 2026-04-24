@@ -45,17 +45,15 @@ void TextRenderer::Load(std::string font, unsigned int fontSize)
 
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    for (GLubyte c = 0; c < 128; c++)
+    auto loadGlyph = [&](uint32_t c)
     {
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
-        {
-            std::cout << "ERROR::FREETYPE: Failed to load Glyph" << std::endl;
-            continue;
-        }
+            return;
 
         unsigned int texture;
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
+
         glTexImage2D(
             GL_TEXTURE_2D,
             0,
@@ -72,13 +70,36 @@ void TextRenderer::Load(std::string font, unsigned int fontSize)
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-        Character character = {
-            texture,
-            glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
-            glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
-            face->glyph->advance.x};
-        Characters.insert(std::pair<char, Character>(c, character));
+        Character character =
+            {
+                texture,
+                glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+                glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+                face->glyph->advance.x};
+
+        Characters[c] = character;
+    };
+
+    for (uint32_t c = 0; c < 128; c++)
+    {
+        loadGlyph(c);
     }
+
+    std::vector<uint32_t> extras =
+        {
+            176, // °
+            177, // ±
+            178, // ²
+            179, // ³
+            215, // ×
+            247  // ÷
+        };
+
+    for (uint32_t c : extras)
+    {
+        loadGlyph(c);
+    }
+
     glBindTexture(GL_TEXTURE_2D, 0);
 
     FT_Done_Face(face);
@@ -92,10 +113,44 @@ void TextRenderer::renderText(std::string text, float x, float y, glm::vec2 scal
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(this->VAO);
 
-    std::string::const_iterator c;
-    for (c = text.begin(); c != text.end(); c++)
+    std::vector<uint32_t> codepoints;
+    for (size_t i = 0; i < text.size();)
     {
-        Character ch = Characters[*c];
+        uint32_t cp = 0;
+        unsigned char c = text[i];
+
+        if (c < 0x80)
+        {
+            cp = c;
+            i += 1;
+        }
+        else if ((c >> 5) == 0x6)
+        {
+            cp = ((c & 0x1F) << 6) | (text[i + 1] & 0x3F);
+            i += 2;
+        }
+        else if ((c >> 4) == 0xE)
+        {
+            cp = ((c & 0x0F) << 12) |
+                 ((text[i + 1] & 0x3F) << 6) |
+                 (text[i + 2] & 0x3F);
+            i += 3;
+        }
+        else
+        {
+            i += 1;
+            continue;
+        }
+
+        codepoints.push_back(cp);
+    }
+
+    for (uint32_t cp : codepoints)
+    {
+        if (Characters.find(cp) == Characters.end())
+            continue;
+
+        Character ch = Characters[cp];
 
         float xpos = x + ch.Bearing.x * scale.x;
         float ypos = y + (this->Characters['H'].Bearing.y - ch.Bearing.y) * scale.y;

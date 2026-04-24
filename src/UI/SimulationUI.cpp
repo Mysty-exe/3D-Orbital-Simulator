@@ -3,10 +3,10 @@
 SimulationUI::SimulationUI(float WIDTH, float HEIGHT) : WIDTH(WIDTH), HEIGHT(HEIGHT), scale(Vector(1).getGLM()), uiState(SIM), menu(false), typing(false), moreInfo(false), error(false), helpMenu(false)
 {
     font = TextRenderer(WIDTH, HEIGHT), bigFont = TextRenderer(WIDTH, HEIGHT), titleFont = TextRenderer(WIDTH, HEIGHT), biggestFont = TextRenderer(WIDTH, HEIGHT);
-    font.Load("../assets/Fonts/Montserrat.ttf", 30);
-    bigFont.Load("../assets/Fonts/Montserrat.ttf", 42);
-    titleFont.Load("../assets/Fonts/Montserrat.ttf", 50);
-    biggestFont.Load("../assets/Fonts/Montserrat.ttf", 80);
+    font.Load("../assets/Fonts/DejaVuSans.ttf", 30);
+    bigFont.Load("../assets/Fonts/DejaVuSans.ttf", 42);
+    titleFont.Load("../assets/Fonts/DejaVuSans.ttf", 50);
+    biggestFont.Load("../assets/Fonts/DejaVuSans.ttf", 80);
 
     UiRenderer = new UIRenderer(WIDTH, HEIGHT);
 
@@ -432,7 +432,10 @@ void SimulationUI::handleEvents(Simulation *sim, EventManager *eventManager, flo
             uiState = (uiState != ADD1) ? ADD1 : SIM;
             sim->pause(false);
             if (uiState == ADD1)
+            {
+                sim->setFocusedObject(nullptr);
                 sim->pause(true);
+            }
 
             menu = false;
         }
@@ -851,12 +854,12 @@ void SimulationUI::setSpeedDetails(const CelestialObject *obj)
     std::string surfaceGravityStr = surfaceGravitySS.str();
     std::string netForceStr = netForceSS.str();
 
-    angularVelText.setText("Angular Velocity: " + angularVelStr + " deg/s");
+    angularVelText.setText("Angular Velocity: " + angularVelStr + "°/s");
     rotationalPeriodText.setText("Orbital Rotational Period: " + rotationalPeriodStr + " seconds");
     circularVelText.setText("Circular Velocity: " + circularVelStr + " m/s");
     surfaceEscapeVelText.setText("Surface Escape Velocity: " + surfaceEscapeVelStr + " m/s");
-    accelerationText.setText("Acceleration: " + accelerationStr + " m/s^2");
-    surfaceGravityText.setText("Surface Gravity: " + surfaceGravityStr + " m/s^2");
+    accelerationText.setText("Acceleration: " + accelerationStr + " m/s²");
+    surfaceGravityText.setText("Surface Gravity: " + surfaceGravityStr + " m/s²");
     netForceText.setText("Net Force: " + netForceStr + " N");
 }
 
@@ -886,8 +889,8 @@ void SimulationUI::setOrbitalDetails(Simulation *sim)
     semiMajorAxisText.setText("Semi-Major-Axis: " + semiMajorAxisStr + " m");
     apoapsisText.setText("Apoapsis:  " + apoapsisStr + " m");
     periapsisText.setText("Periapsis: " + periapsisStr + " m");
-    angularMomentumText.setText("Angular Momentum: " + angularMomentumStr + " J*s");
-    inclinationText.setText("Inclination: " + inclinationStr + " degrees");
+    angularMomentumText.setText("Angular Momentum: " + angularMomentumStr + " J × s");
+    inclinationText.setText("Inclination: " + inclinationStr + "°");
     periodText.setText("Orbital Period: " + periodStr + " days");
     escapeVelText.setText("Orbit Escape Velocity: " + escapeVelStr + " m/s");
 }
@@ -918,16 +921,16 @@ void SimulationUI::renderUIText(Simulation *sim)
             setOrbitalDetails(sim);
     }
 
-    focusPanel.setTitle(nameText);
+    focusPanel.setTitle(nameText, glm::vec2(scale.getGLM()));
 
     auto focusIcon = std::make_unique<UIIcon>("../assets/Icons/plus.png", glm::vec2(48) * glm::vec2(scale.getGLM()), glm::vec2(0, 0), glm::vec4(0.0f));
     focusIcon->setHoverColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
     focusPanel.addButton(std::move(focusIcon), UIText("", font, glm::vec2(scale.getGLM())), TopRight);
 
-    focusPanel.addText(typeText);
-    focusPanel.addText(radiusText);
-    focusPanel.addText(massText);
-    focusPanel.addText(velocityText);
+    focusPanel.addText(typeText, glm::vec2(scale.getGLM()));
+    focusPanel.addText(radiusText, glm::vec2(scale.getGLM()));
+    focusPanel.addText(massText, glm::vec2(scale.getGLM()));
+    focusPanel.addText(velocityText, glm::vec2(scale.getGLM()));
     focusPanel.wrap();
 
     if (uiState == SIM)
@@ -990,18 +993,18 @@ void SimulationUI::renderInfoText(Simulation *sim)
         auto infoIcon = std::make_unique<UIIcon>("../assets/Icons/minus.png", glm::vec2(48) * glm::vec2(scale.getGLM()), glm::vec2(0, 0), glm::vec4(0.0f));
         infoIcon->setHoverColor(glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
         infoPanel.addButton(std::move(infoIcon), UIText("", font, glm::vec2(scale.getGLM())), TopRight);
-        infoPanel.setTitle((UIText(sim->getFocusedObject()->getName(), titleFont, glm::vec2(scale.getGLM()))));
+        infoPanel.setTitle((UIText(sim->getFocusedObject()->getName(), titleFont, glm::vec2(scale.getGLM()))), glm::vec2(scale.getGLM()));
 
         viewRect = std::make_unique<UIRect>(glm::vec4(0.0, 0.0, 0.0, 0.0));
         viewRect->setSize(glm::vec2(infoPanel.getWidth() - 20, infoPanel.getHeight() / 15));
         viewRect->setWrap(false, true);
         viewRect->setScroll(infoPanel.getPanelScroll());
-        viewRect->setTitle(UIText("Object Details", bigFont, glm::vec2(scale.getGLM())));
+        viewRect->setTitle(UIText("Object Details", bigFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
         viewRect->addIcon("../assets/Icons/object.png", glm::vec2(50) * glm::vec2(scale.getGLM()));
-        viewRect->addText(typeText);
-        viewRect->addText(radiusText);
-        viewRect->addText(massText);
-        viewRect->addText(velocityText);
+        viewRect->addText(typeText, glm::vec2(scale.getGLM()));
+        viewRect->addText(radiusText, glm::vec2(scale.getGLM()));
+        viewRect->addText(massText, glm::vec2(scale.getGLM()));
+        viewRect->addText(velocityText, glm::vec2(scale.getGLM()));
         infoPanel.addRect(std::move(viewRect), glm::vec2(scale.getGLM()));
 
         std::unique_ptr<UIIcon> netForceIcon, trajectoryIcon;
@@ -1020,15 +1023,15 @@ void SimulationUI::renderInfoText(Simulation *sim)
         viewRect->setSize(glm::vec2(infoPanel.getWidth() - 20, infoPanel.getHeight() / 15));
         viewRect->setWrap(false, true);
         viewRect->setScroll(infoPanel.getPanelScroll());
-        viewRect->setTitle(UIText("Velocity & Forces", bigFont, glm::vec2(scale.getGLM())));
+        viewRect->setTitle(UIText("Velocity & Forces", bigFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
         viewRect->addIcon("../assets/Icons/velocity.png", glm::vec2(50) * glm::vec2(scale.getGLM()));
-        viewRect->addText(angularVelText);
-        viewRect->addText(rotationalPeriodText);
-        viewRect->addText(circularVelText);
-        viewRect->addText(surfaceEscapeVelText);
-        viewRect->addText(accelerationText);
-        viewRect->addText(surfaceGravityText);
-        viewRect->addText(netForceText);
+        viewRect->addText(angularVelText, glm::vec2(scale.getGLM()));
+        viewRect->addText(rotationalPeriodText, glm::vec2(scale.getGLM()));
+        viewRect->addText(circularVelText, glm::vec2(scale.getGLM()));
+        viewRect->addText(surfaceEscapeVelText, glm::vec2(scale.getGLM()));
+        viewRect->addText(accelerationText, glm::vec2(scale.getGLM()));
+        viewRect->addText(surfaceGravityText, glm::vec2(scale.getGLM()));
+        viewRect->addText(netForceText, glm::vec2(scale.getGLM()));
         viewRect->addBodyIcon(std::move(netForceIcon));
         viewRect->addBodyIcon(std::move(trajectoryIcon));
         infoPanel.addRect(std::move(viewRect), glm::vec2(scale.getGLM()));
@@ -1039,17 +1042,17 @@ void SimulationUI::renderInfoText(Simulation *sim)
             viewRect->setSize(glm::vec2(infoPanel.getWidth() - 20, infoPanel.getHeight() / 15));
             viewRect->setWrap(false, true);
             viewRect->setScroll(infoPanel.getPanelScroll());
-            viewRect->setTitle(UIText("Orbital Details", bigFont, glm::vec2(scale.getGLM())));
+            viewRect->setTitle(UIText("Orbital Details", bigFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
             viewRect->addIcon("../assets/Icons/orbit.png", glm::vec2(50) * glm::vec2(scale.getGLM()));
-            viewRect->addText(centralBodyText);
-            viewRect->addText(eccentricityText);
-            viewRect->addText(semiMajorAxisText);
-            viewRect->addText(apoapsisText);
-            viewRect->addText(periapsisText);
-            viewRect->addText(angularMomentumText);
-            viewRect->addText(inclinationText);
-            viewRect->addText(periodText);
-            viewRect->addText(escapeVelText);
+            viewRect->addText(centralBodyText, glm::vec2(scale.getGLM()));
+            viewRect->addText(eccentricityText, glm::vec2(scale.getGLM()));
+            viewRect->addText(semiMajorAxisText, glm::vec2(scale.getGLM()));
+            viewRect->addText(apoapsisText, glm::vec2(scale.getGLM()));
+            viewRect->addText(periapsisText, glm::vec2(scale.getGLM()));
+            viewRect->addText(angularMomentumText, glm::vec2(scale.getGLM()));
+            viewRect->addText(inclinationText, glm::vec2(scale.getGLM()));
+            viewRect->addText(periodText, glm::vec2(scale.getGLM()));
+            viewRect->addText(escapeVelText, glm::vec2(scale.getGLM()));
             infoPanel.addRect(std::move(viewRect), glm::vec2(scale.getGLM()));
         }
 
@@ -1057,11 +1060,11 @@ void SimulationUI::renderInfoText(Simulation *sim)
         viewRect->setSize(glm::vec2(infoPanel.getWidth() - 20, infoPanel.getHeight() / 15));
         viewRect->setWrap(false, true);
         viewRect->setScroll(infoPanel.getPanelScroll());
-        viewRect->setTitle(UIText("Energy", bigFont, glm::vec2(scale.getGLM())));
+        viewRect->setTitle(UIText("Energy", bigFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
         viewRect->addIcon("../assets/Icons/energy.png", glm::vec2(50) * glm::vec2(scale.getGLM()));
-        viewRect->addText(potentialText);
-        viewRect->addText(kineticText);
-        viewRect->addText(totalEnergyText);
+        viewRect->addText(potentialText, glm::vec2(scale.getGLM()));
+        viewRect->addText(kineticText, glm::vec2(scale.getGLM()));
+        viewRect->addText(totalEnergyText, glm::vec2(scale.getGLM()));
         infoPanel.addRect(std::move(viewRect), glm::vec2(scale.getGLM()));
 
         infoPanel.setLines();
@@ -1129,11 +1132,11 @@ void SimulationUI::renderSimulationOverlay(Simulation *sim, EventManager *eventM
             UiRenderer->drawRect(editScreen);
 
         viewPanel.addIcon("../assets/Icons/view.png", glm::vec2(56) * glm::vec2(scale.getGLM()));
-        viewPanel.setTitle(UIText("View Objects", titleFont, glm::vec2(scale.getGLM())));
+        viewPanel.setTitle(UIText("View Objects", titleFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
 
         if (uiState == ADD1)
         {
-            addPanel.setTitle(UIText("Add Object", titleFont, glm::vec2(scale.getGLM())));
+            addPanel.setTitle(UIText("Add Object", titleFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
             addPanel.addIcon("../assets/Icons/planets.png", glm::vec2(56) * glm::vec2(scale.getGLM()));
 
             for (int i = 0; i < celestialTypes.size(); i++)
@@ -1145,21 +1148,21 @@ void SimulationUI::renderSimulationOverlay(Simulation *sim, EventManager *eventM
                 addRect->setScroll(addPanel.getPanelScroll());
                 addRect->setWrap(false, true);
 
-                addRect->setTitle(UIText(celestialTypes[i], titleFont, glm::vec2(scale.getGLM()) * glm::vec2(0.8)));
+                addRect->setTitle(UIText(celestialTypes[i], titleFont, glm::vec2(scale.getGLM()) * glm::vec2(0.8)), glm::vec2(scale.getGLM()));
                 addRect->addIcon("../assets/Icons/" + celestialTypes[i] + ".png", glm::vec2(50) * glm::vec2(scale.getGLM()));
                 if (i == 0)
-                    addRect->addText(UIText(std::to_string(starPaths.size()) + " " + celestialTypes[i] + " Available", font, glm::vec2(scale.getGLM())));
+                    addRect->addText(UIText(std::to_string(starPaths.size()) + " " + celestialTypes[i] + " Available", font, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
                 if (i == 1)
-                    addRect->addText(UIText(std::to_string(planetPaths.size()) + " " + celestialTypes[i] + " Available", font, glm::vec2(scale.getGLM())));
+                    addRect->addText(UIText(std::to_string(planetPaths.size()) + " " + celestialTypes[i] + " Available", font, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
                 if (i == 2)
-                    addRect->addText(UIText(std::to_string(moonPaths.size()) + " " + celestialTypes[i] + " Available", font, glm::vec2(scale.getGLM())));
+                    addRect->addText(UIText(std::to_string(moonPaths.size()) + " " + celestialTypes[i] + " Available", font, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
 
                 addPanel.addRect(std::move(addRect), glm::vec2(scale.getGLM()));
             }
         }
         else if (uiState == ADD2)
         {
-            addPanel.setTitle(UIText("Add " + addType, titleFont, glm::vec2(scale.getGLM())));
+            addPanel.setTitle(UIText("Add " + addType, titleFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
             addPanel.addIcon("../assets/Icons/" + addType + ".png", glm::vec2(56) * glm::vec2(scale.getGLM()));
 
             int x;
@@ -1180,14 +1183,14 @@ void SimulationUI::renderSimulationOverlay(Simulation *sim, EventManager *eventM
 
         if (sim->getSelectedObject() == nullptr)
         {
-            editPanel.setTitle(UIText("Edit Object", titleFont, glm::vec2(scale.getGLM())));
+            editPanel.setTitle(UIText("Edit Object", titleFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
             editPanel.addIcon("../assets/Icons/edit.png", glm::vec2(56) * glm::vec2(scale.getGLM()));
         }
         else
         {
             if (sim->isMovingObject() && (sim->getMoveType() != 2 && sim->getMoveType() != 3))
             {
-                editPanel.setTitle(UIText("Editing Objects", titleFont, glm::vec2(scale.getGLM())));
+                editPanel.setTitle(UIText("Editing Objects", titleFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
                 editPanel.addIcon("../assets/Icons/edit.png", glm::vec2(56) * glm::vec2(scale.getGLM()));
 
                 std::unique_ptr<UIRect> viewRect;
@@ -1204,8 +1207,8 @@ void SimulationUI::renderSimulationOverlay(Simulation *sim, EventManager *eventM
                     viewRect->setWrap(false, true);
                     viewRect->setScroll(editPanel.getPanelScroll());
                     viewRect->addIcon("../assets/Icons/" + obj->getObjTypeStr() + "s.png", glm::vec2(48));
-                    viewRect->setTitle(UIText(objects[i]->getName(), bigFont, glm::vec2(scale.getGLM())));
-                    viewRect->addText(UIText(addCommas(removeTrailingZeroes(std::to_string(sim->getDistance(obj, sim->getSelectedObject()) / 1000))) + " km from " + sim->getSelectedObject()->getName(), font, glm::vec2(scale.getGLM())));
+                    viewRect->setTitle(UIText(objects[i]->getName(), bigFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
+                    viewRect->addText(UIText(addCommas(removeTrailingZeroes(std::to_string(sim->getDistance(obj, sim->getSelectedObject()) / 1000))) + " km from " + sim->getSelectedObject()->getName(), font, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
 
                     editPanel.addRect(std::move(viewRect), glm::vec2(scale.getGLM()));
                 }
@@ -1216,7 +1219,7 @@ void SimulationUI::renderSimulationOverlay(Simulation *sim, EventManager *eventM
                     editPanelFields[i].cursorOn = (int)(cursorTimer.getTicksNS() / 1'000'000'000.0f) % 2 == 0;
 
                 editPanel.addIcon("../assets/Icons/back.png", glm::vec2(50) * glm::vec2(scale.getGLM()));
-                editPanel.setTitle(UIText("Editing " + sim->getSelectedObject()->getName(), titleFont, glm::vec2(scale.getGLM())));
+                editPanel.setTitle(UIText("Editing " + sim->getSelectedObject()->getName(), titleFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
 
                 std::unique_ptr<UIRect> editRect = std::make_unique<UIRect>(glm::vec4(1.0f, 1.0f, 1.0f, 0.0f));
                 editRect->setSize(glm::vec2(editPanel.getWidth() - 20, editPanel.getHeight() / 15));
@@ -1227,18 +1230,18 @@ void SimulationUI::renderSimulationOverlay(Simulation *sim, EventManager *eventM
                 radiusTextField = std::make_unique<UITextField>(editPanelFields[1], glm::vec2(0.0f), glm::vec2(0.0f), UIText("km", font, glm::vec2(scale.getGLM()), 0, 0), glm::vec4(1.0f));
                 massTextField = std::make_unique<UITextField>(editPanelFields[2], glm::vec2(0.0f), glm::vec2(0.0f), UIText("kg", font, glm::vec2(scale.getGLM()), 0, 0), glm::vec4(1.0f));
                 orbVelocityTextField = std::make_unique<UITextField>(editPanelFields[3], glm::vec2(0.0f), glm::vec2(0.0f), UIText("m/s", font, glm::vec2(scale.getGLM()), 0, 0), glm::vec4(1.0f));
-                tiltTextField = std::make_unique<UITextField>(editPanelFields[4], glm::vec2(0.0f), glm::vec2(0.0f), UIText("deg", font, glm::vec2(scale.getGLM()), 0, 0), glm::vec4(1.0f));
+                tiltTextField = std::make_unique<UITextField>(editPanelFields[4], glm::vec2(0.0f), glm::vec2(0.0f), UIText("degrees", font, glm::vec2(scale.getGLM()), 0, 0), glm::vec4(1.0f));
                 rotPeriodTextField = std::make_unique<UITextField>(editPanelFields[5], glm::vec2(0.0f), glm::vec2(0.0f), UIText("s", font, glm::vec2(scale.getGLM()), 0, 0), glm::vec4(1.0f));
                 starIntensityTextField = std::make_unique<UITextField>(editPanelFields[6], glm::vec2(0.0f), glm::vec2(0.0f), UIText("", font, glm::vec2(scale.getGLM()), 0, 0), glm::vec4(1.0f));
 
-                editRect->addTextField(std::move(nameTextField));
-                editRect->addTextField(std::move(radiusTextField));
-                editRect->addTextField(std::move(massTextField));
-                editRect->addTextField(std::move(orbVelocityTextField));
-                editRect->addTextField(std::move(tiltTextField));
-                editRect->addTextField(std::move(rotPeriodTextField));
+                editRect->addTextField(std::move(nameTextField), glm::vec2(scale.getGLM()));
+                editRect->addTextField(std::move(radiusTextField), glm::vec2(scale.getGLM()));
+                editRect->addTextField(std::move(massTextField), glm::vec2(scale.getGLM()));
+                editRect->addTextField(std::move(orbVelocityTextField), glm::vec2(scale.getGLM()));
+                editRect->addTextField(std::move(tiltTextField), glm::vec2(scale.getGLM()));
+                editRect->addTextField(std::move(rotPeriodTextField), glm::vec2(scale.getGLM()));
                 if (sim->getSelectedObject()->getObjType() == STAR)
-                    editRect->addTextField(std::move(starIntensityTextField));
+                    editRect->addTextField(std::move(starIntensityTextField), glm::vec2(scale.getGLM()));
 
                 editPanel.addRect(std::move(editRect), glm::vec2(scale.getGLM()));
 
@@ -1314,12 +1317,12 @@ void SimulationUI::renderSimulationOverlay(Simulation *sim, EventManager *eventM
             viewRect->setWrap(false, true);
             viewRect->setScroll(viewPanel.getPanelScroll());
             viewRect->addIcon("../assets/Icons/" + obj->getObjTypeStr() + "s.png", glm::vec2(48) * glm::vec2(scale.getGLM()));
-            viewRect->setTitle(UIText(objects[i]->getName(), bigFont, glm::vec2(scale.getGLM())));
+            viewRect->setTitle(UIText(objects[i]->getName(), bigFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
 
             if (sim->isFollowCam())
-                viewRect->addText(UIText(addCommas(removeTrailingZeroes(std::to_string(sim->getDistance(obj, sim->getFocusedObject()) / 1000))) + " km from " + sim->getFocusedObject()->getName(), font, glm::vec2(scale.getGLM())));
+                viewRect->addText(UIText(addCommas(removeTrailingZeroes(std::to_string(sim->getDistance(obj, sim->getFocusedObject()) / 1000))) + " km from " + sim->getFocusedObject()->getName(), font, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
             else
-                viewRect->addText(UIText(addCommas(removeTrailingZeroes(std::to_string(sim->getDistance(obj, sim->getFocusedObject()) / 1000))) + " km from Camera", font, glm::vec2(scale.getGLM())));
+                viewRect->addText(UIText(addCommas(removeTrailingZeroes(std::to_string(sim->getDistance(obj, sim->getFocusedObject()) / 1000))) + " km from Camera", font, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
 
             viewPanel.addRect(std::move(viewRect), glm::vec2(scale.getGLM()));
 
@@ -1332,10 +1335,10 @@ void SimulationUI::renderSimulationOverlay(Simulation *sim, EventManager *eventM
                 editRect->setWrap(false, true);
                 editRect->setScroll(editPanel.getPanelScroll());
                 editRect->addIcon("../assets/Icons/" + obj->getObjTypeStr() + "s.png", glm::vec2(48));
-                editRect->setTitle(UIText(objects[i]->getName(), bigFont, glm::vec2(scale.getGLM())));
-                editRect->addText(radiusText);
-                editRect->addText(massText);
-                editRect->addText(velocityText);
+                editRect->setTitle(UIText(objects[i]->getName(), bigFont, glm::vec2(scale.getGLM())), glm::vec2(scale.getGLM()));
+                editRect->addText(radiusText, glm::vec2(scale.getGLM()));
+                editRect->addText(massText, glm::vec2(scale.getGLM()));
+                editRect->addText(velocityText, glm::vec2(scale.getGLM()));
 
                 editPanel.addRect(std::move(editRect), glm::vec2(scale.getGLM()));
             }
