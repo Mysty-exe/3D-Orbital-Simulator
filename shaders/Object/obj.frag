@@ -47,7 +47,7 @@ void main()
         
         float distance=length(lightPositions[i]-FragPos);
         
-        float attenuation=1./(distance*distance*.0000001);
+        float attenuation=1./(distance*distance*.00000005);
         attenuation=max(attenuation,.001);
         
         float diff=max(dot(norm,lightDir),0.);

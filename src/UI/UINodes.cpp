@@ -150,18 +150,18 @@ void UIRect::addTextField(std::unique_ptr<UITextField> textField)
 
     textFields.push_back(std::move(textField));
 }
-void UIRect::setPositions()
+void UIRect::setPositions(glm::vec2 scale)
 {
     for (int i = 0; i < title.size(); i++)
     {
         if (i != 0)
-            title[i].setPos(x + 20, title[i - 1].getEndY() + 10, scroll);
+            title[i].setPos(x + 20, title[i - 1].getEndY(scale.y) + 10, scroll);
         else
         {
             if (icon != nullptr)
             {
                 title[i].setPos(icon->getEndX() + 20, y + 20, scroll);
-                icon->setY(title[i].getY() + (title[i].getHeight() / 2) - (icon->getHeight() / 2) + 5);
+                icon->setY(title[i].getY() + (title[i].getHeight() * scale.y / 2) - (icon->getHeight() / 2) + 5);
             }
             else
                 title[i].setPos(x + 20, y + 20, scroll);
@@ -171,11 +171,11 @@ void UIRect::setPositions()
     for (int i = 0; i < texts.size(); i++)
     {
         if (i != 0)
-            texts[i].setPos(x + 20, texts[i - 1].getEndY() + 15, scroll);
+            texts[i].setPos(x + 20, texts[i - 1].getEndY(scale.y) + 15, scroll);
         else
         {
             if (title.size() > 0)
-                texts[i].setPos(x + 20, title[title.size() - 1].getEndY() + 30, scroll);
+                texts[i].setPos(x + 20, title[title.size() - 1].getEndY(scale.y) + 30, scroll);
             else
                 texts[i].setPos(x + 20, y + 20, scroll);
         }
@@ -209,9 +209,9 @@ void UIRect::setPositions()
     for (int i = 0; i < icons.size(); i++)
     {
         if (i != 0)
-            icons[i]->setPos(glm::vec2(x + 20, icons[i - 1]->getEndY() + 10));
+            icons[i]->setPos(glm::vec2(x + 20, icons[i - 1]->getEndY(scale.y) + 10));
         else
-            icons[i]->setPos(glm::vec2(x + 20, texts[texts.size() - 1].getEndY() + 20));
+            icons[i]->setPos(glm::vec2(x + 20, texts[texts.size() - 1].getEndY(scale.y) + 20));
     }
 }
 void UIRect::clearText()
@@ -365,7 +365,7 @@ UIIcon &UIIcon::setHoverColor(glm::vec4 color)
     return *this;
 }
 
-void UIIcon::setText(const std::string &text, TextRenderer font, float scale)
+void UIIcon::setText(const std::string &text, TextRenderer font, glm::vec2 scale)
 {
     this->text = UIText(text, font, scale).setPos(x, y, rect.getScroll());
 }
@@ -375,17 +375,24 @@ void UIIcon::setSize(glm::vec2 size)
     width = size.x;
     height = size.y;
     rect.setSize(size);
-    regImage->setSize(size);
+    regImage->setSize(size - glm::vec2(10.0f));
     if (toggleImage)
-        toggleImage->setSize(size);
+        toggleImage->setSize(size - glm::vec2(10.0f));
+
+    text.setPos(x, y + rect.getHeight() / 2 - text.getHeight() / 2, rect.getScroll());
+    rect.setPos(glm::vec2(x, y) + glm::vec2(text.getWidth() + 10, 0));
+    regImage->setPos(glm::vec2(x, y) + glm::vec2(5.0f) + glm::vec2(text.getWidth() + 10, 0));
+
+    if (toggleImage)
+        toggleImage->setPos(glm::vec2(x, y) + glm::vec2(5.0f) + glm::vec2(text.getWidth() + 10, 0));
 }
 
 void UIIcon::setPos(glm::vec2 pos)
 {
     x = pos.x;
     y = pos.y;
-    text.setPos(pos.x, pos.y + rect.getHeight() / 2 - text.getHeight() / 2, rect.getScroll());
     // UINode::setPos(pos + glm::vec2(text.getWidth() + 10, 0));
+    text.setPos(pos.x, pos.y + rect.getHeight() / 2 - text.getHeight() / 2, rect.getScroll());
     rect.setPos(pos + glm::vec2(text.getWidth() + 10, 0));
     regImage->setPos(pos + glm::vec2(5.0f) + glm::vec2(text.getWidth() + 10, 0));
 
@@ -432,7 +439,30 @@ UIPanel::UIPanel(Location location, glm::vec2 gameSize, glm::vec2 panelSize, glm
 }
 void UIPanel::setDimensions(float WIDTH, float HEIGHT)
 {
-    gameWidth = WIDTH, gameHeight = HEIGHT;
+    gameWidth = WIDTH;
+    gameHeight = HEIGHT;
+    switch (panelLocation)
+    {
+    case TopLeft:
+        x = 0 - width, y = 0;
+        finalX = 0, finalY = 0;
+        break;
+    case BottomLeft:
+        x = 0 - width, y = gameHeight - height;
+        finalX = 0, finalY = gameHeight - height;
+        break;
+    case TopRight:
+        x = gameWidth, y = 0;
+        finalX = gameWidth - width, finalY = 0;
+        break;
+    case BottomRight:
+        x = gameWidth, y = gameHeight - height;
+        finalX = gameWidth - width, finalY = gameHeight - height;
+        break;
+    }
+}
+void UIPanel::wrap()
+{
     switch (panelLocation)
     {
     case TopLeft:
@@ -562,7 +592,7 @@ void UIPanel::addImageRect(std::unique_ptr<UIRect> imageRect)
 
     imageRects.push_back(std::move(imageRect));
 }
-void UIPanel::addRect(std::unique_ptr<UIRect> rect)
+void UIPanel::addRect(std::unique_ptr<UIRect> rect, glm::vec2 scale)
 {
     int yInc = (rects.size() == 0) ? contentHeight + 20 : rects[rects.size() - 1]->getEndY() + 10;
     rect->setPos(glm::vec2(x + 10, yInc));
@@ -572,7 +602,7 @@ void UIPanel::addRect(std::unique_ptr<UIRect> rect)
     if (wrapHeight)
         height = contentHeight + 20;
 
-    rect->setPositions();
+    rect->setPositions(scale);
     rects.push_back(std::move(rect));
 }
 void UIPanel::addButton(std::unique_ptr<UIIcon> icon, UIText text, Location location)
@@ -597,7 +627,7 @@ void UIPanel::clearRect()
 }
 
 UIText::UIText() : UINode(glm::vec2(0), glm::vec2(0)) {}
-UIText::UIText(const std::string &text, TextRenderer font, float scale, float x, float y, glm::vec4 color)
+UIText::UIText(const std::string &text, TextRenderer font, glm::vec2 scale, float x, float y, glm::vec4 color)
     : UINode(glm::vec2(0), glm::vec2(x, y)), text(text), font(font), scale(scale), color(color)
 {
     getTextDimensions();
@@ -613,13 +643,13 @@ void UIText::getTextDimensions()
     {
         Character ch = font.Characters[c];
 
-        int ascent = ch.Bearing.y * scale;
-        int descent = (ch.Size.y - ch.Bearing.y) * scale;
+        int ascent = ch.Bearing.y * scale.y;
+        int descent = (ch.Size.y - ch.Bearing.y) * scale.y;
 
         maxAscent = std::max(maxAscent, ascent);
         maxDescent = std::max(maxDescent, descent);
 
-        width += (ch.Advance >> 6) * scale;
+        width += (ch.Advance >> 6) * scale.x;
     }
 
     height = maxAscent + maxDescent;

@@ -23,6 +23,17 @@ private:
     SimulationUI *simUI;
     Shader shaderBlur, shaderBloom, skyboxShader;
 
+    unsigned int quadVAO, quadVBO;
+    unsigned int skyboxVAO, skyboxVBO;
+    unsigned int cubemapTexture;
+
+    unsigned int hdrFBO;
+    unsigned int colorBuffers[2];
+    unsigned int rboDepth;
+
+    unsigned int pingpongFBO[2];
+    unsigned int pingpongColorbuffers[2];
+
     SDL_Cursor *defaultCursor, *pointerCursor;
 
 public:
@@ -77,10 +88,7 @@ public:
         sim = new Simulation(WIDTH, HEIGHT);
         simUI = new SimulationUI(WIDTH, HEIGHT);
         running = true;
-    }
 
-    void run()
-    {
         float quadVertices[] = {
             -1.0f,
             1.0f,
@@ -143,7 +151,6 @@ public:
             -1.0f, -1.0f, 1.0f,
             1.0f, -1.0f, 1.0f};
 
-        unsigned int quadVAO, quadVBO;
         glGenVertexArrays(1, &quadVAO);
         glGenBuffers(1, &quadVBO);
         glBindVertexArray(quadVAO);
@@ -154,7 +161,6 @@ public:
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void *)(2 * sizeof(float)));
 
-        unsigned int skyboxVAO, skyboxVBO;
         glGenVertexArrays(1, &skyboxVAO);
         glGenBuffers(1, &skyboxVBO);
         glBindVertexArray(skyboxVAO);
@@ -170,7 +176,7 @@ public:
             "../assets/Skybox/bottom.png",
             "../assets/Skybox/front.png",
             "../assets/Skybox/back.png"};
-        unsigned int cubemapTexture = loadCubemap(faces);
+        cubemapTexture = loadCubemap(faces);
 
         shaderBlur = Shader("../shaders/Bloom/blur.vert", "../shaders/Bloom/blur.frag", "");
         shaderBloom = Shader("../shaders/Bloom/screen.vert", "../shaders/Bloom/screen.frag", "");
@@ -186,11 +192,9 @@ public:
         skyboxShader.use();
         skyboxShader.setInt("skybox", 0);
 
-        unsigned int hdrFBO;
         glGenFramebuffers(1, &hdrFBO);
         glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
 
-        unsigned int colorBuffers[2];
         glGenTextures(2, colorBuffers);
         for (unsigned int i = 0; i < 2; i++)
         {
@@ -204,7 +208,6 @@ public:
             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colorBuffers[i], 0);
         }
 
-        unsigned int rboDepth;
         glGenRenderbuffers(1, &rboDepth);
         glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
         glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
@@ -217,8 +220,6 @@ public:
             std::cout << "Framebuffer not complete!" << std::endl;
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        unsigned int pingpongFBO[2];
-        unsigned int pingpongColorbuffers[2];
         glGenFramebuffers(2, pingpongFBO);
         glGenTextures(2, pingpongColorbuffers);
         for (unsigned int i = 0; i < 2; i++)
@@ -235,7 +236,10 @@ public:
             if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
                 std::cout << "Framebuffer not complete!" << std::endl;
         }
+    }
 
+    void run()
+    {
         while (running)
         {
             deltaTimer.start();
@@ -249,7 +253,9 @@ public:
             }
             else if (eventManager->changedWindowSize())
             {
-                // sim->resize(eventManager->getWidth(), eventManager->getHeight());
+                int w, h;
+                SDL_GetWindowSizeInPixels(window, &w, &h);
+                resizeApp();
             }
 
             if (simUI->gettingModels())
@@ -266,7 +272,7 @@ public:
             if (simUI->canLoadModels())
                 simUI->loadModels();
 
-            glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
             glDepthMask(GL_TRUE);
@@ -390,11 +396,53 @@ public:
         }
     }
 
+    void resizeApp()
+    {
+        WIDTH = eventManager->getWidth();
+        HEIGHT = eventManager->getHeight();
+        sim->resize(eventManager->getWidth(), eventManager->getHeight());
+        simUI->resize(eventManager->getWidth(), eventManager->getHeight());
+        glViewport(0, 0, WIDTH, HEIGHT);
+
+        for (unsigned int i = 0; i < 2; i++)
+        {
+            glBindTexture(GL_TEXTURE_2D, colorBuffers[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+        }
+
+        glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
+        glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, WIDTH, HEIGHT);
+
+        for (unsigned int i = 0; i < 2; i++)
+        {
+            glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, WIDTH, HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
+        }
+    }
+
     void destroy()
     {
         delete eventManager;
         delete sim;
         delete simUI;
+
+        glDeleteVertexArrays(1, &quadVAO);
+        glDeleteBuffers(1, &quadVBO);
+
+        glDeleteVertexArrays(1, &skyboxVAO);
+        glDeleteBuffers(1, &skyboxVBO);
+
+        glDeleteTextures(1, &cubemapTexture);
+        glDeleteTextures(2, colorBuffers);
+        glDeleteTextures(2, pingpongColorbuffers);
+
+        glDeleteFramebuffers(1, &hdrFBO);
+        glDeleteFramebuffers(2, pingpongFBO);
+
+        glDeleteRenderbuffers(1, &rboDepth);
+
+        SDL_DestroyCursor(defaultCursor);
+        SDL_DestroyCursor(pointerCursor);
 
         SDL_GL_DestroyContext(glContext);
         SDL_DestroyWindow(window);

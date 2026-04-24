@@ -226,7 +226,7 @@ public:
 
     bool EventManager::changedWindowSize()
     {
-        return changedWidth != 0 && changedHeight != 0;
+        return changedWidth != 0 || changedHeight != 0;
     }
 
     int EventManager::getWidth()

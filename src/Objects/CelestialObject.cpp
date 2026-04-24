@@ -47,7 +47,7 @@ CelestialObject::CelestialObject(Model m, CelestialType objType, Vector cameraPo
 CelestialObject::CelestialObject(const CelestialObject *obj, Vector cameraPos, Vector cameraDir, float scaledRadiusFactor, float scaledDistanceFactor)
     : name(obj->getName()), objType(obj->getObjType()), mass(obj->getMass()), radius(obj->getRadius()), netForces(Vector(0)), velocity(Vector(0)), acceleration(Vector(0)), scaledRadiusFactor(scaledRadiusFactor), scaledDistanceFactor(scaledDistanceFactor), tilt(glm::radians(obj->getTilt()))
 {
-    this->position = cameraPos + (cameraDir * static_cast<largeFloat>(this->radius * scaledRadiusFactor * scaledDistanceFactor * 2));
+    this->position = cameraPos + (cameraDir * static_cast<largeFloat>(this->radius * scaledRadiusFactor * scaledDistanceFactor * 5));
     this->prevPosition = this->position;
 
     this->model = glm::mat4(1.0f);

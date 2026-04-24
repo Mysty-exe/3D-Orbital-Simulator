@@ -14,9 +14,9 @@ Simulation::Simulation(int WIDTH, int HEIGHT)
     camera = new Camera(glm::vec3(0.0f, 0.0f, 2000.0f));
     camera->setSpeed(1000.0f);
 
-    celestialObjects.push_back(new CelestialObject("../assets/Models/Stars/StarOne/obj.obj", "Sun", STAR, Vector(0.0f, 0.0f, 0.0f), 1.989 * pow(10, 30), 695700.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0), 7.25, 0));
-    celestialObjects.push_back(new CelestialObject("../assets/Models/Planets/Earth/obj.obj", "Earth",
-                                                   PLANET, Vector(199600000.0f, 10000.0f, 0.0f), 5.97 * pow(10, 24), 60371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, -2, 29.722), 23.5, glm::two_pi<float>() / 86400.0));
+    // celestialObjects.push_back(new CelestialObject("../assets/Models/Stars/StarOne/obj.obj", "Sun", STAR, Vector(0.0f, 0.0f, 0.0f), 1.989 * pow(10, 30), 695700.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0), 7.25, 0));
+    // celestialObjects.push_back(new CelestialObject("../assets/Models/Planets/Uranus/obj.obj", "Uranus",
+    //                                                PLANET, Vector(200000000.0f, 0.0f, 0.0f), 5.97 * pow(10, 24), 60371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, -2, 29.722), 23.5, glm::two_pi<float>() / 86400.0));
     // celestialObjects.push_back(new CelestialObject("../assets/Models/Planets/Mars/obj.obj", "Mars",
     //                                                PLANET, Vector(99600000.0f, -2134210.0f, 0.0f), 8.97 * pow(10, 24), 9371.0f, scaledRadiusFactor, scaledDistanceFactor, Vector(0, 3, -37.722), 23.5, glm::two_pi<float>() / 60000.0));
 
@@ -38,9 +38,6 @@ void Simulation::resize(int WIDTH, int HEIGHT)
 {
     this->WIDTH = WIDTH;
     this->HEIGHT = HEIGHT;
-
-    textRenderer = TextRenderer(WIDTH, HEIGHT);
-    textRenderer.Load("../assets/Fonts/Montserrat.ttf", 32);
 }
 
 void Simulation::setRenderMatrices(Shader &shader, glm::mat4 view, glm::mat4 projection)
@@ -110,11 +107,14 @@ void Simulation::drawObj(CelestialObject *obj)
         obj->startTrajectoryThread(celestialObjects, alpha, 0.01f * timeSpeed);
 
     trajShader.use();
-    trajShader.setVec3("color", glm::vec3(1.0f));
-    obj->drawTrajectory(trajShader);
+    if (!editing)
+    {
+        trajShader.setVec3("color", glm::vec3(1.0f));
+        obj->drawTrajectory(trajShader);
 
-    trajShader.setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
-    obj->drawNetForceVector(trajShader);
+        trajShader.setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
+        obj->drawNetForceVector(trajShader);
+    }
 
     trajShader.setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
     obj->drawDirectionVector(trajShader);
@@ -135,7 +135,6 @@ void Simulation::drawHighlightedObj(CelestialObject *obj)
     if (!paused)
         obj->startTrajectoryThread(celestialObjects, alpha, 0.01f * timeSpeed);
 
-    // draw trajectories/vectors WITHOUT touching stencil
     glStencilMask(0x00);
     trajShader.use();
     trajShader.setVec3("color", glm::vec3(1.0f));
@@ -144,7 +143,6 @@ void Simulation::drawHighlightedObj(CelestialObject *obj)
     obj->drawNetForceVector(trajShader);
     obj->drawDirectionVector(trajShader);
 
-    // NOW write stencil only for the model
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glStencilFunc(GL_ALWAYS, 1, 0xFF);
@@ -161,7 +159,6 @@ void Simulation::drawHighlightedObj(CelestialObject *obj)
     else
         obj->drawModel(objShader, alpha);
 
-    // draw outline where stencil != 1
     glStencilFunc(GL_NOTEQUAL, 1, 0xFF);
     glStencilMask(0x00);
 
@@ -173,7 +170,6 @@ void Simulation::drawHighlightedObj(CelestialObject *obj)
 
     obj->drawModel(highlightShader, alpha, true, thickness);
 
-    // reset
     glStencilMask(0xFF);
     glStencilFunc(GL_ALWAYS, 0, 0xFF);
     glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
@@ -189,7 +185,7 @@ void Simulation::run(SDL_Window *window, EventManager *eventManager, SimulationU
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
-    projection = glm::perspective(glm::radians(camera->getZoom()), (float)WIDTH / (float)HEIGHT, 50.0f, 10000.0f);
+    projection = glm::perspective(glm::radians(camera->getZoom()), (float)WIDTH / (float)HEIGHT, 100.0f, 1000000.0f);
 
     setRenderMatrices(lightShader, camera->getViewMatrix(), projection);
     setRenderMatrices(blurShader, camera->getViewMatrix(), projection);
@@ -374,7 +370,7 @@ CelestialObject *Simulation::getCentralBody(CelestialObject *obj)
 
 void Simulation::handleEvents(SDL_Window *window, EventManager *eventManager, SimulationUI *simUI)
 {
-    if (!simUI->isScrolling())
+    if (!simUI->isScrolling() && !movingObject)
         camera->zoom(static_cast<float>(eventManager->getMouseWheel().y));
 
     if (eventManager->isHoldingClick() && !simUI->isScrolling() && eventManager->getMouseOffset().magnitude != 0)
@@ -388,6 +384,7 @@ void Simulation::handleEvents(SDL_Window *window, EventManager *eventManager, Si
         camera->setRotating(false);
         SDL_SetWindowRelativeMouseMode(window, false);
         movingObject = false;
+        simUI->resetScroll();
     }
 
     if (hoveringObject != nullptr)
@@ -514,7 +511,7 @@ void Simulation::handleEvents(SDL_Window *window, EventManager *eventManager, Si
     if (eventManager->checkHoldKeyEvent(CTRL) && !editing)
     {
         if (eventManager->checkPressKeyEvent(P))
-            pause(true);
+            pause(!paused);
 
         if (eventManager->checkPressKeyEvent(PLUS))
         {
@@ -525,34 +522,41 @@ void Simulation::handleEvents(SDL_Window *window, EventManager *eventManager, Si
             speedDown();
         }
 
-        if (eventManager->checkPressKeyEvent(BACKSPACE))
-            focusedObject = nullptr;
-        if (eventManager->checkPressKeyEvent(LEFT))
+        if (celestialObjects.size() > 0)
         {
-            focusedObjectInt = (focusedObjectInt <= 0 && celestialObjects.size() > 0) ? celestialObjects.size() - 1 : focusedObjectInt - 1;
-            camera->setCameraDirection(glm::normalize(celestialObjects[focusedObjectInt]->getRenderPos(alpha).getGLM() - camera->getCameraPos()));
-            focusedObject = celestialObjects[focusedObjectInt];
-        }
-        else if (eventManager->checkPressKeyEvent(RIGHT))
-        {
-            focusedObjectInt = (focusedObjectInt >= celestialObjects.size() - 1 && celestialObjects.size() > 0) ? 0 : focusedObjectInt + 1;
-            camera->setCameraDirection(glm::normalize(celestialObjects[focusedObjectInt]->getRenderPos(alpha).getGLM() - camera->getCameraPos()));
-            focusedObject = celestialObjects[focusedObjectInt];
+            if (eventManager->checkPressKeyEvent(BACKSPACE))
+                focusedObject = nullptr;
+            if (eventManager->checkPressKeyEvent(LEFT))
+            {
+                focusedObjectInt = (focusedObjectInt <= 0 && celestialObjects.size() > 0) ? celestialObjects.size() - 1 : focusedObjectInt - 1;
+                camera->setCameraDirection(glm::normalize(celestialObjects[focusedObjectInt]->getRenderPos(alpha).getGLM() - camera->getCameraPos()));
+                focusedObject = celestialObjects[focusedObjectInt];
+            }
+            else if (eventManager->checkPressKeyEvent(RIGHT))
+            {
+                focusedObjectInt = (focusedObjectInt >= celestialObjects.size() - 1 && celestialObjects.size() > 0) ? 0 : focusedObjectInt + 1;
+                camera->setCameraDirection(glm::normalize(celestialObjects[focusedObjectInt]->getRenderPos(alpha).getGLM() - camera->getCameraPos()));
+                focusedObject = celestialObjects[focusedObjectInt];
+            }
         }
     }
 
     if (editing)
     {
-        if (eventManager->checkPressKeyEvent(ONE) || eventManager->checkPressKeyEvent(TWO) || eventManager->checkPressKeyEvent(THREE) || eventManager->checkPressKeyEvent(FOUR) && !simUI->isTyping())
+        if ((eventManager->checkPressKeyEvent(ONE) || eventManager->checkPressKeyEvent(TWO) || eventManager->checkPressKeyEvent(THREE) || eventManager->checkPressKeyEvent(FOUR)) && !simUI->isTyping())
         {
             if (eventManager->checkPressKeyEvent(ONE))
                 moveType = 0;
             else if (eventManager->checkPressKeyEvent(TWO))
                 moveType = 1;
-            else if (eventManager->checkPressKeyEvent(THREE))
-                moveType = 2;
-            else if (eventManager->checkPressKeyEvent(FOUR))
-                moveType = 3;
+            else if (eventManager->checkPressKeyEvent(THREE) || eventManager->checkPressKeyEvent(FOUR))
+            {
+                simUI->resetScroll();
+                if (eventManager->checkPressKeyEvent(FOUR))
+                    moveType = 2;
+                else if (eventManager->checkPressKeyEvent(FOUR))
+                    moveType = 3;
+            }
 
             if (selectedObject != nullptr)
                 if (moveType == 2 || moveType == 3)

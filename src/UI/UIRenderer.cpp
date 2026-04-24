@@ -47,6 +47,15 @@ UIRenderer::~UIRenderer()
     glDeleteBuffers(1, &rectEBO);
 }
 
+void UIRenderer::resize(float WIDTH, float HEIGHT)
+{
+    this->WIDTH = WIDTH;
+    this->HEIGHT = HEIGHT;
+
+    rectShader.use();
+    rectShader.setMat4("projection", glm::ortho(0.0f, WIDTH, HEIGHT, 0.0f));
+}
+
 void UIRenderer::drawRect(const UIRect &rect, glm::vec2 scale)
 {
     glm::mat4 model = glm::mat4(1.0f);

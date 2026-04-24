@@ -27,8 +27,9 @@ public:
 
     TextRenderer();
     TextRenderer(unsigned int width, unsigned int height);
+    void resetSize(unsigned int width, unsigned int height);
     void Load(std::string font, unsigned int fontSize);
-    void renderText(std::string text, float x, float y, float scale, glm::vec3 color = glm::vec3(1.0f));
+    void renderText(std::string text, float x, float y, glm::vec2 scale, glm::vec3 color = glm::vec3(1.0f));
 
 private:
     unsigned int VAO, VBO;

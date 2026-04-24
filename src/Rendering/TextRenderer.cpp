@@ -23,6 +23,13 @@ TextRenderer::TextRenderer(unsigned int width, unsigned int height)
     glBindVertexArray(0);
 }
 
+void TextRenderer::resetSize(unsigned int width, unsigned int height)
+{
+    textShader.use();
+    textShader.setMat4("projection", glm::ortho(0.0f, static_cast<float>(width), static_cast<float>(height), 0.0f));
+    textShader.setInt("text", 0);
+}
+
 void TextRenderer::Load(std::string font, unsigned int fontSize)
 {
     this->Characters.clear();
@@ -78,7 +85,7 @@ void TextRenderer::Load(std::string font, unsigned int fontSize)
     FT_Done_FreeType(ft);
 }
 
-void TextRenderer::renderText(std::string text, float x, float y, float scale, glm::vec3 color)
+void TextRenderer::renderText(std::string text, float x, float y, glm::vec2 scale, glm::vec3 color)
 {
     textShader.use();
     textShader.setVec3("textColor", color);
@@ -90,11 +97,11 @@ void TextRenderer::renderText(std::string text, float x, float y, float scale, g
     {
         Character ch = Characters[*c];
 
-        float xpos = x + ch.Bearing.x * scale;
-        float ypos = y + (this->Characters['H'].Bearing.y - ch.Bearing.y) * scale;
+        float xpos = x + ch.Bearing.x * scale.x;
+        float ypos = y + (this->Characters['H'].Bearing.y - ch.Bearing.y) * scale.y;
 
-        float w = ch.Size.x * scale;
-        float h = ch.Size.y * scale;
+        float w = ch.Size.x * scale.x;
+        float h = ch.Size.y * scale.y;
 
         float vertices[6][4] = {
             {xpos, ypos + h, 0.0f, 1.0f},
@@ -111,7 +118,7 @@ void TextRenderer::renderText(std::string text, float x, float y, float scale, g
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        x += (ch.Advance >> 6) * scale;
+        x += (ch.Advance >> 6) * scale.x;
     }
 
     glBindVertexArray(0);

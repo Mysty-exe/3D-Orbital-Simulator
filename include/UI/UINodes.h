@@ -37,8 +37,8 @@ public:
     float getX() const { return x; }
     float getY() const { return y; }
     glm::vec2 getPos() const { return glm::vec2(x, y); }
-    float getEndX() const { return x + width; }
-    float getEndY() const { return y + height; }
+    float getEndX(float scale = 1) const { return x + width * scale; }
+    float getEndY(float scale = 1) const { return y + height * scale; }
     void setX(float x) { this->x = x; }
     void setY(float y) { this->y = y; }
     void setPos(glm::vec2 pos) { this->x = pos.x, this->y = pos.y; }
@@ -51,12 +51,13 @@ struct UIText : public UINode
 private:
     TextRenderer font;
     std::string text;
-    float scale, scroll;
+    float scroll;
+    glm::vec2 scale;
     glm::vec4 color;
 
 public:
     UIText();
-    UIText(const std::string &text, TextRenderer font, float scale, float x = 0, float y = 0, glm::vec4 color = glm::vec4(1.0f));
+    UIText(const std::string &text, TextRenderer font, glm::vec2 scale = glm::vec2(1, 1), float x = 0, float y = 0, glm::vec4 color = glm::vec4(1.0f));
     void getTextDimensions();
 
     UIText &setText(const std::string &newText)
@@ -74,6 +75,7 @@ public:
     }
     std::string getText() { return text; }
     void renderText();
+    void setScale(glm::vec2 scale) { this->scale = scale; }
 };
 
 struct UIRect : public UINode
@@ -114,7 +116,7 @@ public:
     void setTitle(UIText &text);
     void addText(UIText &text);
     void addTextField(std::unique_ptr<UITextField> textField);
-    void setPositions();
+    void setPositions(glm::vec2 scale);
     std::vector<UIText> &getTitle() { return title; }
     std::vector<UIText> &getTexts() { return texts; }
     std::vector<std::unique_ptr<UITextField>> &getTextFields() { return textFields; }
@@ -223,7 +225,7 @@ public:
     UIIcon &setToggleImage(const std::string &path);
     UIIcon &setHoverColor(glm::vec4 color);
     const UIText &getText() const { return text; }
-    void setText(const std::string &text, TextRenderer font, float scale);
+    void setText(const std::string &text, TextRenderer font, glm::vec2 scale);
     void setSize(glm::vec2 size);
     const UIRect &getRect() const { return rect; }
     const UIImage &getImage() const;
@@ -255,6 +257,7 @@ public:
     UIPanel();
     UIPanel(Location location, glm::vec2 gameSize, glm::vec2 panelSize, glm::vec4 color);
     void setDimensions(float WIDTH, float HEIGHT);
+    void wrap();
     void enter(float deltaTime);
     void exit(float deltaTime);
     void scrollPanel(float deltaTime);
@@ -271,6 +274,6 @@ public:
     std::vector<std::unique_ptr<UIRect>> &getImageRects() { return imageRects; }
     void addButton(std::unique_ptr<UIIcon> icon, UIText text, Location location);
     void addImageRect(std::unique_ptr<UIRect> imageRect);
-    void addRect(std::unique_ptr<UIRect> rect);
+    void addRect(std::unique_ptr<UIRect> rect, glm::vec2 scale);
     void clearRect();
 };

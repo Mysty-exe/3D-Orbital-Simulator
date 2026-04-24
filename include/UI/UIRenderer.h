@@ -1,6 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 #include "UI/UINodes.h"
+#include "Utils/Vector.h"
 #include "Rendering/Shader.h"
 
 class UIRenderer
@@ -10,11 +11,13 @@ private:
     Shader rectShader;
 
     float WIDTH, HEIGHT;
+    Vector scale;
 
 public:
     UIRenderer();
-    ~UIRenderer();
     UIRenderer(float WIDTH, float HEIGHT);
+    ~UIRenderer();
+    void resize(float WIDTH, float HEIGHT);
     void drawRect(const UIRect &rect, glm::vec2 scale = glm::vec2(1, 1));
     void drawTextField(UITextField &textField, glm::vec2 scale = glm::vec2(1, 1));
     void drawLine(float width, glm::vec2 pos);

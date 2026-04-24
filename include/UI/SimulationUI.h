@@ -22,6 +22,7 @@ private:
     unsigned int rectVAO, rectVBO, rectEBO;
     TextRenderer biggestFont, titleFont, bigFont, font;
     float WIDTH, HEIGHT, uiRotate;
+    Vector scale;
 
     UIRenderer *UiRenderer;
 
@@ -54,10 +55,13 @@ private:
 public:
     SimulationUI(float WIDTH, float HEIGHT);
     ~SimulationUI();
+    void resize(int WIDTH, int HEIGHT);
     void getModels();
     void loadModels();
     std::string removeTrailingZeroes(std::string number);
+    std::string addCommas(std::string number);
     bool validateNumber(std::string num, bool canBeNeg = true);
+    void resetScroll();
     void handleEvents(Simulation *sim, EventManager *eventManager, float deltaTime);
     std::string getTimePassed(largeFloat timePassed, largeFloat timeSpeed);
     void setupTextFields(const CelestialObject *obj);
