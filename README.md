@@ -18,6 +18,8 @@ It focuses on visualizing orbital dynamics in a scalable and interactive environ
 - Custom OpenGL rendering pipeline
 - SDL based windowing and input system
 
+## Demo
+
 ## Technical Details
 
 ### Physics

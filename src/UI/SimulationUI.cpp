@@ -828,7 +828,6 @@ void SimulationUI::setObjectDetails(const CelestialObject *obj)
     std::string massStr = massSS.str();
     std::string velStr = velSS.str();
 
-    focusPanel.addIcon("../assets/Icons/" + obj->getObjTypeStr() + "s.png", glm::vec2(45) * glm::vec2(scale.getGLM()));
     velocityText.setText("Velocity: " + removeTrailingZeroes(velStr) + " m/s");
     massText.setText("Mass: " + removeTrailingZeroes(massStr) + " kg");
     radiusText.setText("Radius: " + removeTrailingZeroes(radiusStr) + " km");
@@ -919,6 +918,8 @@ void SimulationUI::renderUIText(Simulation *sim)
         setEnergyDetails(sim->getFocusedObject());
         if (sim->getFocusedObject()->isOrbiting())
             setOrbitalDetails(sim);
+
+        focusPanel.addIcon("../assets/Icons/" + sim->getFocusedObject()->getObjTypeStr() + "s.png", glm::vec2(45) * glm::vec2(scale.getGLM()));
     }
 
     focusPanel.setTitle(nameText, glm::vec2(scale.getGLM()));
