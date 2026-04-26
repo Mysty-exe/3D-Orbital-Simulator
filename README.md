@@ -20,6 +20,12 @@ It focuses on visualizing orbital dynamics in a scalable and interactive environ
 
 ## Demo
 
+![Simulation](assets/Screenshots/simulation.gif)
+![Simulation](assets/Screenshots/simulation.png)
+![Info of Object](assets/Screenshots/info.png)
+![Add Object](assets/Screenshots/add.png)
+![Edit Object](assets/Screenshots/edit.png)
+
 ## Technical Details
 
 ### Physics
