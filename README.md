@@ -18,9 +18,8 @@ It focuses on visualizing orbital dynamics in a scalable and interactive environ
 - Custom OpenGL rendering pipeline
 - SDL based windowing and input system
 
-## Demo
+## Screenshots
 
-![Simulation](assets/Screenshots/simulation.gif)
 ![Simulation](assets/Screenshots/simulation.png)
 ![Info of Object](assets/Screenshots/info.png)
 ![Add Object](assets/Screenshots/add.png)
