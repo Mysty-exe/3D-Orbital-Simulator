@@ -253,17 +253,17 @@ public:
             }
             else if (eventManager->changedWindowSize())
             {
-                int w, h;
-                SDL_GetWindowSizeInPixels(window, &w, &h);
                 resizeApp();
             }
 
             if (simUI->gettingModels())
             {
-                glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
                 glBindFramebuffer(GL_FRAMEBUFFER, 0);
+                glClearColor(0, 0, 0, 1);
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
                 simUI->renderLoadingScreen();
+
                 SDL_GL_SwapWindow(window);
                 capFrameRate();
                 continue;
@@ -272,22 +272,70 @@ public:
             if (simUI->canLoadModels())
                 simUI->loadModels();
 
-            glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
             glBindFramebuffer(GL_FRAMEBUFFER, hdrFBO);
+            glEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-            glEnable(GL_DEPTH_TEST);
-            glDepthFunc(GL_LEQUAL);
 
             if (!simUI->isHelp())
                 sim->run(window, eventManager, simUI, deltaTime);
 
-            glStencilMask(0xFF);
-            glStencilFunc(GL_ALWAYS, 0, 0xFF);
-            glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
-            glDepthMask(GL_FALSE);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            bool horizontal = true;
+            bool firstIteration = true;
+            unsigned int amount = 10;
+
+            shaderBlur.use();
+
+            for (unsigned int i = 0; i < amount; i++)
+            {
+                glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
+
+                shaderBlur.setInt("horizontal", horizontal);
+
+                glBindTexture(
+                    GL_TEXTURE_2D,
+                    firstIteration ? colorBuffers[1] : pingpongColorbuffers[!horizontal]);
+
+                glBindVertexArray(quadVAO);
+                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+                horizontal = !horizontal;
+
+                if (firstIteration)
+                    firstIteration = false;
+            }
+
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            shaderBloom.use();
+
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
+
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[!horizontal]);
+
+            glDisable(GL_DEPTH_TEST);
+
+            glBindVertexArray(quadVAO);
+            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+            glBindFramebuffer(GL_READ_FRAMEBUFFER, hdrFBO);
+            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+            glBlitFramebuffer(
+                0, 0, WIDTH, HEIGHT,
+                0, 0, WIDTH, HEIGHT,
+                GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT,
+                GL_NEAREST);
+            glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            glEnable(GL_DEPTH_TEST);
             glDepthFunc(GL_LEQUAL);
+
             skyboxShader.use();
             glm::mat4 view = glm::mat4(glm::mat3(sim->getCamera()->getViewMatrix()));
             skyboxShader.setMat4("view", view);
@@ -296,40 +344,7 @@ public:
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
             glDrawArrays(GL_TRIANGLES, 0, 36);
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glDisable(GL_DEPTH_TEST);
-
-            bool horizontal = true, first_iteration = true;
-            unsigned int amount = 10;
-            shaderBlur.use();
-            for (unsigned int i = 0; i < amount; i++)
-            {
-                glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);
-                shaderBlur.setInt("horizontal", horizontal);
-                glBindTexture(GL_TEXTURE_2D, first_iteration ? colorBuffers[1] : pingpongColorbuffers[!horizontal]);
-
-                glBindVertexArray(quadVAO);
-                glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-                glBindVertexArray(0);
-
-                horizontal = !horizontal;
-                if (first_iteration)
-                    first_iteration = false;
-            }
-
-            glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            glClear(GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-
-            shaderBloom.use();
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, colorBuffers[0]);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[!horizontal]);
-
-            glDisable(GL_DEPTH_TEST);
-            glBindVertexArray(quadVAO);
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+            glDepthFunc(GL_LESS);
 
             glDisable(GL_DEPTH_TEST);
             simUI->renderSimulationOverlay(sim, eventManager, deltaTime);
@@ -344,7 +359,6 @@ public:
             SDL_GL_SwapWindow(window);
 
             capFrameRate();
-
             eventManager->clear();
         }
     }
