@@ -4,6 +4,7 @@ project(3dOrbitalSimulator)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_WIN32_EXECUTABLE ON)
 set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL")
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
@@ -20,6 +21,10 @@ set(APP_ICON app.rc)
 add_executable(3dOrbitalSimulator
     ${SOURCES}
     ${APP_ICON}
+)
+
+set_target_properties(3dOrbitalSimulator PROPERTIES
+    LINK_FLAGS "/ENTRY:mainCRTStartup"
 )
 
 # Include directories
